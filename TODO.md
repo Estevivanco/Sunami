@@ -1,0 +1,1 @@
+Issue after liking, following or saving song, album or artists, we have to manually refresh the page for the data to show. It does not automatically update. At the the data is stored but doesnt show the data. After refresh I can see the data. Same thing with the library counting songs on the sidebar. I can add songs but the number doesnt update.

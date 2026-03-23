@@ -1,0 +1,407 @@
+/* SearchPage Component */
+.searchPage {
+  padding: 24px;
+}
+
+/* Search Bar */
+.searchBar {
+  position: relative;
+  max-width: 800px;
+  margin-bottom: 32px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 48px 12px 16px;
+  background: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  color: #000;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: #757575;
+}
+
+.clearButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #000;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clearButton:hover {
+  opacity: 0.7;
+}
+
+/* Browse All Section */
+.browseSection {
+  margin-top: 32px;
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.categoryCard {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+  transition: transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.categoryCard:hover {
+  transform: scale(1.02);
+}
+
+.categoryCard h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  z-index: 1;
+}
+
+/* Results Section */
+.resultsSection {
+  margin-top: 24px;
+}
+
+.resultCategory {
+  margin-bottom: 48px;
+}
+
+.categoryTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+/* Songs List */
+.songsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.songItem {
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto;
+  gap: 16px;
+  padding: 8px;
+  border-radius: 4px;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.songItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.songImage {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.songInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.songTitle {
+  font-size: 16px;
+  font-weight: 400;
+  color: #fff;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.songTitle:hover {
+  text-decoration: underline;
+}
+
+.songMeta {
+  font-size: 14px;
+  color: #b3b3b3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.songDuration {
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.songActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iconButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #b3b3b3;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    transform 0.1s;
+}
+
+.iconButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.iconButton:active {
+  transform: scale(0.95);
+}
+
+.iconButton.liked {
+  color: #1db954;
+}
+
+.addButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #b3b3b3;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    transform 0.1s;
+}
+
+.addButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.addButton:active {
+  transform: scale(0.95);
+}
+
+/* Artists Grid */
+.artistsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px;
+}
+
+.artistCard {
+  background: #181818;
+  border-radius: 8px;
+  padding: 16px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.artistCard:hover {
+  background: #282828;
+}
+
+.artistImage {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.artistInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.artistName {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artistMeta {
+  font-size: 14px;
+  color: #b3b3b3;
+  text-transform: capitalize;
+}
+
+/* Albums Grid */
+.albumsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px;
+}
+
+.albumCard {
+  background: #181818;
+  border-radius: 8px;
+  padding: 16px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.albumCard:hover {
+  background: #282828;
+}
+
+.albumCover {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.albumInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.albumTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.albumArtist {
+  font-size: 14px;
+  color: #b3b3b3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* States */
+.loadingText,
+.errorText,
+.noResults {
+  color: #b3b3b3;
+  font-size: 16px;
+  padding: 32px 0;
+  text-align: center;
+}
+
+.errorText {
+  color: #e13300;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .categoryGrid,
+  .artistsGrid,
+  .albumsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .searchPage {
+    padding: 16px;
+  }
+
+  .sectionTitle,
+  .categoryTitle {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .categoryGrid,
+  .artistsGrid,
+  .albumsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .artistCard,
+  .albumCard {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .categoryCard {
+    padding: 16px;
+  }
+
+  .categoryCard h3 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .categoryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .artistsGrid,
+  .albumsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

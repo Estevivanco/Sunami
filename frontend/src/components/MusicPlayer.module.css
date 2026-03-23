@@ -1,0 +1,158 @@
+/* Music Player Component */
+.musicPlayer {
+  grid-area: player;
+  background-color: #181818;
+  border-top: 1px solid #282828;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.playerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nowPlaying {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.albumArt {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.trackInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.trackName {
+  font-size: 14px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.artistName {
+  font-size: 12px;
+  color: #b3b3b3;
+}
+
+.playerCenter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.playerControls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.controlBtn {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  font-size: 16px;
+  transition: color 0.2s;
+}
+
+.controlBtn:hover {
+  color: #fff;
+}
+
+.controlBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.playBtn {
+  background: #fff;
+  color: #000;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 14px;
+}
+
+.playBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.playBtn:hover {
+  transform: scale(1.06);
+}
+
+.playBtn:not(:disabled):hover {
+  background: #1ed760;
+  transform: scale(1.06);
+}
+
+.progressBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.time {
+  font-size: 11px;
+  color: #b3b3b3;
+  min-width: 40px;
+}
+
+.barContainer {
+  flex: 1;
+  height: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.bar {
+  width: 100%;
+  height: 4px;
+  background: #404040;
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.barProgress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #1db954;
+  border-radius: 2px;
+}
+
+.playerRight {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.volumeBtn {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  font-size: 16px;
+  transition: color 0.2s;
+}
+
+.volumeBtn:hover {
+  color: #fff;
+}

@@ -1,0 +1,177 @@
+/* HomePage Component */
+.homePage {
+  padding: 24px;
+}
+
+.greeting {
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.section {
+  margin-bottom: 48px;
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+/* Featured Artists Grid */
+.artistsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px;
+}
+
+.artistCard {
+  background: #181818;
+  border-radius: 8px;
+  padding: 16px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.artistCard:hover {
+  background: #282828;
+}
+
+.artistImage {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.artistInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.artistName {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artistMeta {
+  font-size: 14px;
+  color: #b3b3b3;
+  text-transform: capitalize;
+}
+
+/* Popular Albums Grid */
+.albumsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px;
+}
+
+.albumCard {
+  background: #181818;
+  border-radius: 8px;
+  padding: 16px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.albumCard:hover {
+  background: #282828;
+}
+
+.albumCover {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.albumInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.albumTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.albumArtist {
+  font-size: 14px;
+  color: #b3b3b3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.noContent {
+  color: #b3b3b3;
+  font-size: 16px;
+  padding: 32px 0;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .artistsGrid,
+  .albumsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .homePage {
+    padding: 16px;
+  }
+
+  .greeting {
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .artistsGrid,
+  .albumsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .artistCard,
+  .albumCard {
+    padding: 12px;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .artistsGrid,
+  .albumsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -1,0 +1,301 @@
+/* PlaylistPage Component */
+.playlistPage {
+  padding: 24px;
+}
+
+/* Playlist Header */
+.playlistHeader {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  align-items: flex-end;
+}
+
+.playlistCover {
+  width: 232px;
+  height: 232px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.playlistIcon {
+  font-size: 80px;
+}
+
+.playlistInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.playlistType {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.playlistTitle {
+  font-size: 48px;
+  font-weight: 900;
+  color: #fff;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.playlistDescription {
+  font-size: 14px;
+  color: #b3b3b3;
+  margin: 8px 0;
+}
+
+.playlistMeta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  color: #fff;
+}
+
+.playlistOwner {
+  font-weight: 700;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.playButton {
+  background: #1db954;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.playButton:hover {
+  background: #1ed760;
+  transform: scale(1.04);
+}
+
+.deleteButton {
+  background: transparent;
+  color: #b3b3b3;
+  border: 1px solid #b3b3b3;
+  border-radius: 24px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deleteButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: #fff;
+}
+
+/* Songs Table */
+.playlistContent {
+  margin-top: 32px;
+}
+
+.songsTable {
+  display: flex;
+  flex-direction: column;
+}
+
+.songsHeader {
+  display: grid;
+  grid-template-columns: 40px 2fr 1.5fr 1fr 80px;
+  gap: 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid #282828;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #b3b3b3;
+  font-weight: 700;
+}
+
+.headerNumber {
+  text-align: center;
+}
+
+.headerTitle {
+  text-align: left;
+}
+
+.headerAlbum {
+  text-align: left;
+}
+
+.headerDate {
+  text-align: left;
+}
+
+.headerDuration {
+  text-align: right;
+}
+
+.songsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.songItem {
+  display: grid;
+  grid-template-columns: 40px 2fr 1.5fr 1fr 80px;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.songItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.songNumber {
+  text-align: center;
+  font-size: 16px;
+  color: #b3b3b3;
+}
+
+.songInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.songTitle {
+  font-size: 16px;
+  font-weight: 400;
+  color: #fff;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.songTitle:hover {
+  text-decoration: underline;
+}
+
+.songItem:hover .songTitle {
+  color: #1ed760;
+}
+
+.songArtist {
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.songAlbum {
+  font-size: 14px;
+  color: #b3b3b3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.songDate {
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.songDuration {
+  text-align: right;
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.noContent {
+  color: #b3b3b3;
+  font-size: 16px;
+  padding: 32px 0;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .playlistPage {
+    padding: 16px;
+  }
+
+  .playlistHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .playlistCover {
+    width: 200px;
+    height: 200px;
+  }
+
+  .playlistIcon {
+    font-size: 64px;
+  }
+
+  .playlistTitle {
+    font-size: 32px;
+  }
+
+  .songsHeader,
+  .songItem {
+    grid-template-columns: 30px 2fr 1fr 60px;
+  }
+
+  .headerAlbum,
+  .songAlbum,
+  .headerDate,
+  .songDate {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .playlistCover {
+    width: 160px;
+    height: 160px;
+  }
+
+  .playlistIcon {
+    font-size: 48px;
+  }
+
+  .playlistTitle {
+    font-size: 24px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .playButton,
+  .deleteButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
