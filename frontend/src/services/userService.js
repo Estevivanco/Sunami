@@ -10,6 +10,10 @@ import { get, post, put, del } from './api'
 /**
  * Get current user's profile (requires auth)
  */
+export const searchUsers = async (username) => {
+    return await get(`${BASE_URL}/users/search?username=${encodeURIComponent(username)}`)
+}
+
 export const getCurrentProfile = async () => {
     return await get(API_ENDPOINTS.USER_PROFILE)
 }

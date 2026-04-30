@@ -129,61 +129,73 @@ const LibraryPage = () => {
                 )}
 
                 {/* Playlists Tab */}
-
                 {activeTab === 'playlists' && (
-                    <>
-                        {/* User's Own Playlists */}
-                        <div className={styles.grid}>
-                            <h2 className={styles.sectionTitle}>Your Playlists</h2>
+                    <div className={styles.playlistsTab}>
+                        {/* Your Playlists */}
+                        <section className={styles.playlistSection}>
+                            <div className={styles.sectionHeader}>
+                                <h2 className={styles.sectionLabel}>Your Playlists</h2>
+                            </div>
                             {playlists.length > 0 ? (
-                                playlists.map((playlist) => (
-                                    <Link
-                                        key={playlist._id}
-                                        to={getPlaylistRoute(playlist._id)}
-                                        className={styles.card}
-                                    >
-                                        <div className={styles.playlistCover}>
-                                            <span className={styles.playlistIcon}>🎵</span>
-                                        </div>
-                                        <div className={styles.cardInfo}>
-                                            <h3 className={styles.cardTitle}>{playlist.name}</h3>
-                                            <p className={styles.cardMeta}>
-                                                {playlist.songs?.length || 0} songs
-                                            </p>
-                                        </div>
-                                    </Link>
-                                ))
+                                <div className={styles.playlistList}>
+                                    {playlists.map((playlist) => (
+                                        <Link
+                                            key={playlist._id}
+                                            to={getPlaylistRoute(playlist._id)}
+                                            className={styles.playlistRow}
+                                        >
+                                            <div className={styles.playlistThumb}>
+                                                <span className={styles.playlistThumbIcon}>🎵</span>
+                                            </div>
+                                            <div className={styles.playlistRowInfo}>
+                                                <span className={styles.playlistRowName}>{playlist.name}</span>
+                                                <span className={styles.playlistRowMeta}>
+                                                    Playlist · {playlist.songs?.length || 0} {playlist.songs?.length === 1 ? 'song' : 'songs'}
+                                                </span>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
                             ) : (
                                 <p className={styles.noContent}>No playlists yet. Create one to get started!</p>
                             )}
-                        </div>
+                        </section>
+
+                        <div className={styles.sectionDivider} />
 
                         {/* Followed Playlists */}
-                        <div className={styles.grid}>
-                            <h2 className={styles.sectionTitle}>Followed Playlists</h2>
+                        <section className={styles.playlistSection}>
+                            <div className={styles.sectionHeader}>
+                                <h2 className={styles.sectionLabel}>Followed Playlists</h2>
+                                {followedPlaylists.length > 0 && (
+                                    <span className={styles.sectionCount}>{followedPlaylists.length}</span>
+                                )}
+                            </div>
                             {followedPlaylists.length > 0 ? (
-                                followedPlaylists.map((playlist) => (
-                                    <Link
-                                        key={playlist._id}
-                                        to={getPlaylistRoute(playlist._id)}
-                                        className={styles.card}
-                                    >
-                                        <div className={styles.playlistCover}>
-                                            <span className={styles.playlistIcon}>🎵</span>
-                                        </div>
-                                        <div className={styles.cardInfo}>
-                                            <h3 className={styles.cardTitle}>{playlist.name}</h3>
-                                            <p className={styles.cardMeta}>
-                                                {playlist.songs?.length || 0} songs
-                                            </p>
-                                        </div>
-                                    </Link>
-                                ))
+                                <div className={styles.playlistList}>
+                                    {followedPlaylists.map((playlist) => (
+                                        <Link
+                                            key={playlist._id}
+                                            to={getPlaylistRoute(playlist._id)}
+                                            className={styles.playlistRow}
+                                        >
+                                            <div className={styles.playlistThumb}>
+                                                <span className={styles.playlistThumbIcon}>🎵</span>
+                                            </div>
+                                            <div className={styles.playlistRowInfo}>
+                                                <span className={styles.playlistRowName}>{playlist.name}</span>
+                                                <span className={styles.playlistRowMeta}>
+                                                    Playlist · By {typeof playlist.owner === 'object' ? playlist.owner?.username : 'Unknown'}
+                                                </span>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
                             ) : (
                                 <p className={styles.noContent}>No followed playlists yet. Follow playlists to see them here!</p>
                             )}
-                        </div>
-                    </>
+                        </section>
+                    </div>
                 )}
 
                 {/* Albums Tab */}

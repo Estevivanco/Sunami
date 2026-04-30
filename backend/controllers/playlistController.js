@@ -15,7 +15,7 @@ const getAllPlaylists = catchAsync(async (req, res, next) => {
   if (req.userId) {
     // Om inloggad, visa publika + egna privata
     playlists = await playlistRepository.findAll();
-    playlists = playlists.filter(p => p.isPublic || (p.owner && p.owner.toString() === req.userId));
+    playlists = playlists.filter(p => p.isPublic || (p.owner && (p.owner._id || p.owner).toString() === req.userId));
   } else {
     // Ej inloggad, visa endast publika
     playlists = await playlistRepository.findAll();
@@ -43,7 +43,7 @@ const getPlaylistById = catchAsync(async (req, res, next) => {
     console.log('playlist.owner:', playlist.owner ? playlist.owner.toString() : null);
   }
   // Om spellistan är privat, endast ägaren får se
-  if (!playlist.isPublic && (!req.userId || playlist.owner.toString() !== req.userId)) {
+  if (!playlist.isPublic && (!req.userId || (playlist.owner._id || playlist.owner).toString() !== req.userId)) {
     return next(new AppError('This playlist is private', 403));
   }
   res.json(playlist);
@@ -75,7 +75,7 @@ const updatePlaylist = catchAsync(async (req, res, next) => {
   }
   
   // Verifiera ägarskap
-  if (!playlist.owner || playlist.owner.toString() !== req.userId) {
+  if (!playlist.owner || (playlist.owner._id || playlist.owner).toString() !== req.userId) {
     return next(new AppError('Forbidden: You can only update your own playlists', 403));
   }
   
@@ -97,7 +97,7 @@ const deletePlaylist = catchAsync(async (req, res, next) => {
   }
   
   // Verifiera ägarskap
-  if (!playlist.owner || playlist.owner.toString() !== req.userId) {
+  if (!playlist.owner || (playlist.owner._id || playlist.owner).toString() !== req.userId) {
     return next(new AppError('Forbidden: You can only delete your own playlists', 403));
   }
   
@@ -126,7 +126,7 @@ const addSongToPlaylist = catchAsync(async (req, res, next) => {
   }
 
   //Verifiera ägandeskap
-  const isOwner = playlist.owner.toString() === req.userId
+  const isOwner = (playlist.owner._id || playlist.owner).toString() === req.userId
   const isCollaborator = playlist.collaborators.some((id) => id.toString() === req.userId)
 
   if (!isOwner && !isCollaborator) {
@@ -157,9 +157,9 @@ const removeSongFromPlaylist = catchAsync(async (req, res, next) => {
   }
 
   // Verifiera ägarskap
-  const isOwner = playlist.owner.toString() === req.userId
+  const isOwner = (playlist.owner._id || playlist.owner).toString() === req.userId
   const isCollaborator = playlist.collaborators.some((id) => id.toString() === req.userId)
-  
+
   if (!isOwner && !isCollaborator) {
     return next(new AppError('Forbidden: You do not have permission to modify this playlist', 403));
   }
@@ -177,7 +177,7 @@ const followPlaylist = catchAsync(async (req,res,next) => {
   }
 
   // Defensive: check if owner exists
-  if(playlist.owner && playlist.owner.toString() === req.userId){
+  if(playlist.owner && (playlist.owner._id || playlist.owner).toString() === req.userId){
     return next(new AppError('You cannot follow your own playlist', 400))
   }
 
@@ -220,7 +220,7 @@ const addCollaborator = catchAsync(async (req, res, next) => {
   }
 
   // Only the super owner can manage collaborators
-  if (playlist.owner.toString() !== req.userId) {
+  if ((playlist.owner._id || playlist.owner).toString() !== req.userId) {
     return next(new AppError('Forbidden: Only the playlist owner can manage collaborators', 403));
   }
 
@@ -243,7 +243,7 @@ const removeCollaborator = catchAsync(async (req, res, next) => {
   }
 
   // Only the super owner can manage collaborators
-  if (playlist.owner.toString() !== req.userId) {
+  if ((playlist.owner._id || playlist.owner).toString() !== req.userId) {
     return next(new AppError('Forbidden: Only the playlist owner can manage collaborators', 403));
   }
 

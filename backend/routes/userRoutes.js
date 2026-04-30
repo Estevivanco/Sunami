@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  searchUsers,
   getAllUsers,
   getUserById,
   updateUser,
@@ -25,6 +26,9 @@ const router = express.Router();
  * All routes require authentication
  * Authentication routes moved to authRoutes.js
  */
+
+// Search users by username (requires authentication)
+router.get('/users/search', authenticateToken, searchUsers);
 
 // Current user profile (requires authentication)
 router.get('/users/profile', authenticateToken, getProfile);

@@ -8,8 +8,7 @@ export const validatePlaylist = [
     .notEmpty()
     .withMessage('Playlist name is required')
     .isLength({ max: 100 })
-    .withMessage('Playlist name cannot exceed 100 characters')
-    .escape(),
+    .withMessage('Playlist name cannot exceed 100 characters'),
   
   body('description')
     .optional()
@@ -42,8 +41,7 @@ export const validateUpdatePlaylist = [
     .notEmpty()
     .withMessage('Playlist name cannot be empty')
     .isLength({ max: 100 })
-    .withMessage('Playlist name cannot exceed 100 characters')
-    .escape(),
+    .withMessage('Playlist name cannot exceed 100 characters'),
   
   body('description')
     .optional()

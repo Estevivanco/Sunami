@@ -9,16 +9,11 @@ import {
 import {
   validateRegister,
   validateLogin,
-  validateRefreshToken
 } from '../middleware/userValidation.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-/**
- * Public Authentication Routes
- * These routes do NOT require authentication
- */
 
 // POST /api/auth/register - Register a new user
 router.post('/auth/register', validateRegister, register);
@@ -27,12 +22,8 @@ router.post('/auth/register', validateRegister, register);
 router.post('/auth/login', validateLogin, login);
 
 // POST /api/auth/refresh - Refresh access token using refresh token
-router.post('/auth/refresh', validateRefreshToken, refresh);
+router.post('/auth/refresh', refresh);
 
-/**
- * Protected Authentication Routes
- * These routes REQUIRE authentication
- */
 
 // PUT /api/auth/password - Update current user's password (requires auth)
 router.put('/auth/password', authenticateToken, updatePassword);

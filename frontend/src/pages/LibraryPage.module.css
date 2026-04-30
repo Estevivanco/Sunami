@@ -171,20 +171,108 @@
   background: #282828;
 }
 
-/* Playlist Cover */
-.playlistCover {
-  width: 100%;
-  aspect-ratio: 1;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* Playlists Tab — list layout */
+.playlistsTab {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.playlistSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #282828;
+}
+
+.sectionLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #b3b3b3;
+  margin: 0;
+}
+
+.sectionCount {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6a6a6a;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 1px 8px;
+}
+
+.sectionDivider {
+  height: 1px;
+  background: #282828;
+  margin: 4px 0;
+}
+
+.playlistList {
+  display: flex;
+  flex-direction: column;
+}
+
+.playlistRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.playlistRow:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.playlistThumb {
+  width: 48px;
+  height: 48px;
   border-radius: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.playlistIcon {
-  font-size: 48px;
+.playlistThumbIcon {
+  font-size: 22px;
+}
+
+.playlistRowInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.playlistRowName {
+  font-size: 15px;
+  font-weight: 400;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playlistRowMeta {
+  font-size: 13px;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Artist/Album Images */

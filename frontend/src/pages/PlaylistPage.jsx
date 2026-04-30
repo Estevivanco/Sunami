@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { fetchPlaylistById, deletePlaylist, followPlaylist, unfollowPlaylist, addCollaborator, removeCollaborator } from '../services/playlistService'
+import { searchUsers } from '../services/userService'
 import { formatDuration } from '../utils/formatDuration'
 import { formatDate } from '../utils/formatDate'
 import { usePlayer } from '../hooks/usePlayer'
@@ -18,7 +19,9 @@ const PlaylistPage = () => {
     const [playlist, setPlaylist] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
-    const [collaboratorInput, setCollaboratorInput] = useState('')
+    const [collaboratorSearch, setCollaboratorSearch] = useState('')
+    const [searchResults, setSearchResults] = useState([])
+    const [searchLoading, setSearchLoading] = useState(false)
 
     // Move loadPlaylistData outside useEffect for reuse
     const loadPlaylistData = async (signal) => {
@@ -88,12 +91,27 @@ const PlaylistPage = () => {
         }
     }
 
-    const handleAddCollaborator = async () => {
-        if (!collaboratorInput.trim()) return
+    const handleCollaboratorSearch = async (value) => {
+        setCollaboratorSearch(value)
+        if (!value.trim()) { setSearchResults([]); return }
+        setSearchLoading(true)
         try {
-            await addCollaborator(id, collaboratorInput.trim())
-            setCollaboratorInput('')
-            await loadPlaylistData() // Refresh to show new collaborator
+            const results = await searchUsers(value.trim())
+            const collaboratorIds = new Set(playlist.collaborators?.map(c => c._id) ?? [])
+            setSearchResults(results.filter(u => u._id !== String(user?.id) && !collaboratorIds.has(u._id)))
+        } catch {
+            setSearchResults([])
+        } finally {
+            setSearchLoading(false)
+        }
+    }
+
+    const handleAddCollaborator = async (userId) => {
+        try {
+            await addCollaborator(id, userId)
+            setCollaboratorSearch('')
+            setSearchResults([])
+            await loadPlaylistData()
         } catch (err) {
             alert('Failed to add collaborator: ' + err.message)
         }
@@ -157,6 +175,14 @@ const PlaylistPage = () => {
                         )}
                     </div>
                 </div>
+                {/* Delete — top-right of header, owner only */}
+                {isOwner && (
+                    <div className={styles.playlistActions}>
+                        <button className={styles.deleteButton} onClick={handleDelete}>
+                            Delete Playlist
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Actions */}
@@ -173,13 +199,6 @@ const PlaylistPage = () => {
                         ? <button className={`${styles.followButton} ${styles.following}`} onClick={handleUnfollow}>Unfollow</button>
                         : <button className={styles.followButton} onClick={handleFollow}>Follow</button>
                 )}
-                {/* Delete — owner only */}
-                {isOwner && (
-                    <button className={styles.deleteButton} onClick={handleDelete}>
-                        Delete Playlist
-                    </button>
-                )}
-
             </div>
 
             {/* Collaborator Management — owner only, not on system playlists */}
@@ -203,15 +222,36 @@ const PlaylistPage = () => {
                         <p>No collaborators yet</p>
                     )}
 
-                    {/* Add collaborator by user ID */}
+                    {/* Add collaborator by username search */}
                     <div className={styles.addCollaborator}>
-                        <input
-                            type="text"
-                            placeholder="Enter user ID"
-                            value={collaboratorInput}
-                            onChange={(e) => setCollaboratorInput(e.target.value)}
-                        />
-                        <button onClick={handleAddCollaborator}>Add</button>
+                        <div className={styles.searchWrapper}>
+                            <input
+                                type="text"
+                                placeholder="Search by username..."
+                                value={collaboratorSearch}
+                                onChange={(e) => handleCollaboratorSearch(e.target.value)}
+                                autoComplete="off"
+                            />
+                            {(searchResults.length > 0 || searchLoading) && (
+                                <ul className={styles.searchDropdown}>
+                                    {searchLoading && (
+                                        <li className={styles.searchHint}>Searching...</li>
+                                    )}
+                                    {!searchLoading && searchResults.map(u => (
+                                        <li
+                                            key={u._id}
+                                            className={styles.searchResult}
+                                            onClick={() => handleAddCollaborator(u._id)}
+                                        >
+                                            {u.username}
+                                        </li>
+                                    ))}
+                                    {!searchLoading && searchResults.length === 0 && collaboratorSearch && (
+                                        <li className={styles.searchHint}>No users found</li>
+                                    )}
+                                </ul>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

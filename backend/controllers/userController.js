@@ -12,6 +12,15 @@ import { followPlaylist } from './playlistController.js';
  * Authentication moved to authController.js
  */
 
+const searchUsers = catchAsync(async (req, res, next) => {
+  const { username } = req.query;
+  if (!username || username.trim().length < 1) {
+    return res.json([]);
+  }
+  const users = await userRepository.searchByUsername(username.trim());
+  res.json(users);
+});
+
 // Hämta alla användare (endast Admin)
 const getAllUsers = catchAsync(async (req, res, next) => {
   const users = await userRepository.findAll();
@@ -259,6 +268,7 @@ const deleteOwnAccount = catchAsync(async (req, res, next) => {
 });
 
 export {
+  searchUsers,
   getAllUsers,
   getUserById,
   updateUser,

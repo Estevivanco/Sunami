@@ -36,6 +36,13 @@ class UserRepository {
     return await User.findOne({ username });
   }
 
+  async searchByUsername(query) {
+    return await User.find(
+      { username: { $regex: query, $options: 'i' } },
+      { _id: 1, username: 1 }
+    ).limit(10);
+  }
+
   /**
    * Hitta användare med email med lösenord inkluderat (för autentisering)
    * @param {string} email - Användarens email (skiftlägesokänslig)
