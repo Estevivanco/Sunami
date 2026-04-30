@@ -9,6 +9,15 @@
   gap: 24px;
   margin-bottom: 24px;
   align-items: flex-end;
+  position: relative;
+}
+.playlistActions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 12px;
+  z-index: 2;
 }
 
 .playlistCover {
@@ -38,43 +47,33 @@
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  color: #fff;
 }
 
-.playlistTitle {
-  font-size: 48px;
-  font-weight: 900;
+/* Use the same follow button style as ArtistPage */
+.followButton {
+  margin-top: 16px;
+  padding: 8px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  background: transparent;
   color: #fff;
-  margin: 0;
-  line-height: 1.1;
-}
-
-.playlistDescription {
   font-size: 14px;
-  color: #b3b3b3;
-  margin: 8px 0;
-}
-
-.playlistMeta {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  font-size: 14px;
-  color: #fff;
-}
-
-.playlistOwner {
   font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
 }
 
-/* Actions */
-.actions {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-  align-items: center;
+.followButton:hover {
+  border-color: #fff;
+  transform: scale(1.05);
 }
 
+.followButton.following {
+  background: #1db954;
+  border-color: #1db954;
+  color: #fff;
+}
 .playButton {
   background: #1db954;
   color: #fff;

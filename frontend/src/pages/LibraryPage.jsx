@@ -1,8 +1,3 @@
-/**
- * LibraryPage
- * User's personal library - displays liked songs, playlists, saved albums, and followed artists
- */
-
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchMyPlaylists, createPlaylist } from '../services/playlistService'
@@ -14,36 +9,14 @@ import CreatePlaylistModal from '../components/CreatePlaylistModal'
 import styles from './LibraryPage.module.css'
 
 const LibraryPage = () => {
-    const [activeTab, setActiveTab] = useState('songs') // songs, playlists, artists, albums
-    const [playlists, setPlaylists] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const [activeTab, setActiveTab] = useState('songs')
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const { library, loading: libraryLoading } = useLibrary()
+    const { library, loading, addPlaylist } = useLibrary()  // ✅ from context
     const { play } = usePlayer()
-
-    useEffect(() => {
-        loadPlaylists()
-    }, [])
-
-    const loadPlaylists = async () => {
-        try {
-            setLoading(true)
-            setError(null)
-            
-            const playlistsData = await fetchMyPlaylists()
-            setPlaylists(playlistsData)
-        } catch (err) {
-            setError(err.message)
-            console.error('Error loading playlists:', err)
-        } finally {
-            setLoading(false)
-        }
-    }
 
     const handleCreatePlaylist = async (playlistData) => {
         const newPlaylist = await createPlaylist(playlistData)
-        setPlaylists([newPlaylist, ...playlists])
+        addPlaylist(newPlaylist) 
         return newPlaylist
     }
 
@@ -51,22 +24,20 @@ const LibraryPage = () => {
         play(song, songs)
     }
 
-    if (loading || libraryLoading) {
+    if (loading) {
         return <div className={styles.libraryPage}>Loading library...</div>
-    }
-
-    if (error) {
-        return (
-            <div className={styles.libraryPage}>
-                <p>Error: {error}</p>
-                <button onClick={loadPlaylists}>Try Again</button>
-            </div>
-        )
     }
 
     const likedSongs = library.likedSongs || []
     const savedAlbums = library.savedAlbums || []
     const followedArtists = library.followedArtists || []
+
+    // Only playlists owned by the user
+    const playlists = library.playlists || []
+    // Playlists the user follows (not owned)
+    const followedPlaylists = (library.followedPlaylists || []).filter(
+        p => !playlists.some(own => (own._id || own) === (p._id || p))
+    )
 
     return (
         <div className={styles.libraryPage}>
@@ -158,30 +129,61 @@ const LibraryPage = () => {
                 )}
 
                 {/* Playlists Tab */}
+
                 {activeTab === 'playlists' && (
-                    <div className={styles.grid}>
-                        {playlists.length > 0 ? (
-                            playlists.map((playlist) => (
-                                <Link
-                                    key={playlist._id}
-                                    to={getPlaylistRoute(playlist._id)}
-                                    className={styles.card}
-                                >
-                                    <div className={styles.playlistCover}>
-                                        <span className={styles.playlistIcon}>🎵</span>
-                                    </div>
-                                    <div className={styles.cardInfo}>
-                                        <h3 className={styles.cardTitle}>{playlist.name}</h3>
-                                        <p className={styles.cardMeta}>
-                                            {playlist.songs?.length || 0} songs
-                                        </p>
-                                    </div>
-                                </Link>
-                            ))
-                        ) : (
-                            <p className={styles.noContent}>No playlists yet. Create one to get started!</p>
-                        )}
-                    </div>
+                    <>
+                        {/* User's Own Playlists */}
+                        <div className={styles.grid}>
+                            <h2 className={styles.sectionTitle}>Your Playlists</h2>
+                            {playlists.length > 0 ? (
+                                playlists.map((playlist) => (
+                                    <Link
+                                        key={playlist._id}
+                                        to={getPlaylistRoute(playlist._id)}
+                                        className={styles.card}
+                                    >
+                                        <div className={styles.playlistCover}>
+                                            <span className={styles.playlistIcon}>🎵</span>
+                                        </div>
+                                        <div className={styles.cardInfo}>
+                                            <h3 className={styles.cardTitle}>{playlist.name}</h3>
+                                            <p className={styles.cardMeta}>
+                                                {playlist.songs?.length || 0} songs
+                                            </p>
+                                        </div>
+                                    </Link>
+                                ))
+                            ) : (
+                                <p className={styles.noContent}>No playlists yet. Create one to get started!</p>
+                            )}
+                        </div>
+
+                        {/* Followed Playlists */}
+                        <div className={styles.grid}>
+                            <h2 className={styles.sectionTitle}>Followed Playlists</h2>
+                            {followedPlaylists.length > 0 ? (
+                                followedPlaylists.map((playlist) => (
+                                    <Link
+                                        key={playlist._id}
+                                        to={getPlaylistRoute(playlist._id)}
+                                        className={styles.card}
+                                    >
+                                        <div className={styles.playlistCover}>
+                                            <span className={styles.playlistIcon}>🎵</span>
+                                        </div>
+                                        <div className={styles.cardInfo}>
+                                            <h3 className={styles.cardTitle}>{playlist.name}</h3>
+                                            <p className={styles.cardMeta}>
+                                                {playlist.songs?.length || 0} songs
+                                            </p>
+                                        </div>
+                                    </Link>
+                                ))
+                            ) : (
+                                <p className={styles.noContent}>No followed playlists yet. Follow playlists to see them here!</p>
+                            )}
+                        </div>
+                    </>
                 )}
 
                 {/* Albums Tab */}

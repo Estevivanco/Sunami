@@ -20,8 +20,7 @@ export const getAuthHeaders = () => {
  * Centralized fetch wrapper with automatic token refresh
  * Automatically retries failed requests after refreshing token
  */
-export const fetchWithAuth = async (url, options = {}) => {
-    // Merge auth headers with provided options
+export const fetchWithAuth = async (url, options = {}, signal) => {
     const headers = {
         ...getAuthHeaders(),
         ...options.headers
@@ -30,35 +29,25 @@ export const fetchWithAuth = async (url, options = {}) => {
     const config = {
         ...options,
         headers,
-        credentials: 'include' // Always include cookies for refresh token
+        credentials: 'include',
+        ...(signal && { signal })  // ✅ only add signal if provided
     }
 
     try {
-        // Make the initial request
         let response = await fetch(url, config)
 
-        // If 401 Unauthorized, try to refresh token and retry
         if (response.status === 401) {
-            console.log('Token expired, attempting refresh...')
-            
             try {
-                // Refresh the access token
                 await handleRefresh()
-                console.log('Token refreshed successfully')
-
-                // Retry the original request with new token
                 const newHeaders = {
                     ...getAuthHeaders(),
                     ...options.headers
                 }
-                
                 response = await fetch(url, {
                     ...config,
                     headers: newHeaders
                 })
             } catch (refreshError) {
-                console.error('Token refresh failed:', refreshError)
-                // If refresh fails, clear auth and redirect to login
                 localStorage.removeItem('accessToken')
                 localStorage.removeItem('user')
                 window.location.href = '/login'
@@ -66,7 +55,6 @@ export const fetchWithAuth = async (url, options = {}) => {
             }
         }
 
-        // Handle other error status codes
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}))
             throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
@@ -74,45 +62,36 @@ export const fetchWithAuth = async (url, options = {}) => {
 
         return response
     } catch (error) {
-        console.error('API request failed:', error)
+        if (error.name !== 'AbortError') {
+            console.error('API request failed:', error)
+        }
         throw error
     }
 }
 
-/**
- * Shorthand for GET requests
- */
-export const get = async (url) => {
-    const response = await fetchWithAuth(url, { method: 'GET' })
+// Pass signal through all shorthand methods
+export const get = async (url, signal) => {
+    const response = await fetchWithAuth(url, { method: 'GET' }, signal)
     return response.json()
 }
 
-/**
- * Shorthand for POST requests
- */
-export const post = async (url, data) => {
+export const post = async (url, data, signal) => {
     const response = await fetchWithAuth(url, {
         method: 'POST',
         body: JSON.stringify(data)
-    })
+    }, signal)
     return response.json()
 }
 
-/**
- * Shorthand for PUT requests
- */
-export const put = async (url, data) => {
+export const put = async (url, data, signal) => {
     const response = await fetchWithAuth(url, {
         method: 'PUT',
         body: JSON.stringify(data)
-    })
+    }, signal)
     return response.json()
 }
 
-/**
- * Shorthand for DELETE requests
- */
-export const del = async (url) => {
-    const response = await fetchWithAuth(url, { method: 'DELETE' })
+export const del = async (url, signal) => {
+    const response = await fetchWithAuth(url, { method: 'DELETE' }, signal)
     return response.json()
 }

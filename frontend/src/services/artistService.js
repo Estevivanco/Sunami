@@ -1,15 +1,15 @@
 import { API_ENDPOINTS } from '../constants/api'
 
-export const fetchArtists = async () => {
-    const response = await fetch(API_ENDPOINTS.ARTISTS)
+export const fetchArtists = async (signal) => {
+    const response = await fetch(API_ENDPOINTS.ARTISTS, signal)
     if (!response.ok) {
         throw new Error('Failed to fetch artists')
     }
     return await response.json()
 }
 
-export const fetchArtistsById = async (artistId) => {
-    const response = await fetch(API_ENDPOINTS.ARTIST_BY_ID(artistId))
+export const fetchArtistsById = async (artistId, signal) => {
+    const response = await fetch(API_ENDPOINTS.ARTIST_BY_ID(artistId), signal)
     if(!response.ok) {
         throw new Error('Failed to fetch artist by id')
     }

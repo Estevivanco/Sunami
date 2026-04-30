@@ -30,10 +30,13 @@ export const API_ENDPOINTS = {
   SEARCH_SONGS: (query) => `${BASE_URL}/songs?q=${encodeURIComponent(query)}`,
   
   PLAYLISTS: `${BASE_URL}/playlists`,
+  PUBLIC_PLAYLISTS: `${BASE_URL}/playlists/public`,
   MY_PLAYLISTS: `${BASE_URL}/playlists/my`,
   PLAYLIST_BY_ID: (playlistId) => `${BASE_URL}/playlists/${playlistId}`,
   PLAYLIST_SONGS: (playlistId) => `${BASE_URL}/playlists/${playlistId}/songs`,
   ADD_SONG_TO_PLAYLIST: (playlistId, songId) => `${BASE_URL}/playlists/${playlistId}/songs/${songId}`,
+  PLAYLIST_FOLLOW: (playlistId) => `${BASE_URL}/playlists/${playlistId}/follow`,
+  PLAYLIST_COLLABORATORS: (playlistId) => `${BASE_URL}/playlists/${playlistId}/collaborators`,
 }
 
 // Export BASE_URL for custom endpoint construction

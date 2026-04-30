@@ -1,10 +1,26 @@
+// Hämta endast publika spellistor (för sök/browse)
+const getPublicPlaylists = catchAsync(async (req, res, next) => {
+  const playlists = await playlistRepository.findPublic();
+  res.json(playlists);
+});
 import playlistRepository from '../repositories/playlistRepository.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/AppError.js';
+import userRepository from '../repositories/userRepository.js';
 
-// Hämta alla spellistor
+
+// Hämta alla spellistor (endast publika för icke-ägare)
 const getAllPlaylists = catchAsync(async (req, res, next) => {
-  const playlists = await playlistRepository.findAll();
+  let playlists;
+  if (req.userId) {
+    // Om inloggad, visa publika + egna privata
+    playlists = await playlistRepository.findAll();
+    playlists = playlists.filter(p => p.isPublic || (p.owner && p.owner.toString() === req.userId));
+  } else {
+    // Ej inloggad, visa endast publika
+    playlists = await playlistRepository.findAll();
+    playlists = playlists.filter(p => p.isPublic);
+  }
   res.json(playlists);
 });
 
@@ -17,11 +33,19 @@ const getUserPlaylists = catchAsync(async (req, res, next) => {
 // Hämta en specifik spellista med ID
 const getPlaylistById = catchAsync(async (req, res, next) => {
   const playlist = await playlistRepository.findById(req.params.id);
-  
   if (!playlist) {
     return next(new AppError('Playlist not found', 404));
   }
-  
+  // Debug logging for private playlist access
+  if (!playlist.isPublic) {
+    console.log('DEBUG: Checking private playlist access');
+    console.log('req.userId:', req.userId);
+    console.log('playlist.owner:', playlist.owner ? playlist.owner.toString() : null);
+  }
+  // Om spellistan är privat, endast ägaren får se
+  if (!playlist.isPublic && (!req.userId || playlist.owner.toString() !== req.userId)) {
+    return next(new AppError('This playlist is private', 403));
+  }
   res.json(playlist);
 });
 
@@ -33,9 +57,9 @@ const createPlaylist = catchAsync(async (req, res, next) => {
     name,
     description,
     songs,
-    createdBy,
     isPublic,
-    owner: req.userId // Sätts från authenticateToken middleware
+    owner: req.userId,
+    isSystemPlaylist: req.userRole ==='admin'
   });
   
   res.status(201).json(newPlaylist);
@@ -93,17 +117,22 @@ const addSongToPlaylist = catchAsync(async (req, res, next) => {
   if (!playlist) {
     return next(new AppError('Playlist not found', 404));
   }
-  
-  // Verifiera ägarskap - användare kan bara lägga till låtar i sina egna spellistor
-  if (!playlist.owner || playlist.owner.toString() !== req.userId) {
-    return next(new AppError('Forbidden: You can only add songs to your own playlists', 403));
-  }
-
   if (!songId) {
     return next(new AppError('Song ID is required', 400));
   }
 
-  // Lägg till låten i spellistan
+  if (playlist.isSystemPlaylist) {
+    return next(new AppError('Forbidden: Sunami playlists cannot be modified', 403));
+  }
+
+  //Verifiera ägandeskap
+  const isOwner = playlist.owner.toString() === req.userId
+  const isCollaborator = playlist.collaborators.some((id) => id.toString() === req.userId)
+
+  if (!isOwner && !isCollaborator) {
+    return next(new AppError('Forbidden: You do not have permission to modify this playlist', 403));
+  }
+
   const updatedPlaylist = await playlistRepository.addSongToPlaylist(playlistId, songId);
   res.json(updatedPlaylist);
 });
@@ -118,14 +147,107 @@ const removeSongFromPlaylist = catchAsync(async (req, res, next) => {
   if (!playlist) {
     return next(new AppError('Playlist not found', 404));
   }
-  
+
+  if (!songId) {
+    return next(new AppError('Song ID is required', 400));
+  }
+
+  if (playlist.isSystemPlaylist) {
+    return next(new AppError('Forbidden: Sunami playlists cannot be modified', 403));
+  }
+
   // Verifiera ägarskap
-  if (!playlist.owner || playlist.owner.toString() !== req.userId) {
-    return next(new AppError('Forbidden: You can only remove songs from your own playlists', 403));
+  const isOwner = playlist.owner.toString() === req.userId
+  const isCollaborator = playlist.collaborators.some((id) => id.toString() === req.userId)
+  
+  if (!isOwner && !isCollaborator) {
+    return next(new AppError('Forbidden: You do not have permission to modify this playlist', 403));
   }
 
   // Ta bort låten från spellistan
   const updatedPlaylist = await playlistRepository.removeSongFromPlaylist(playlistId, songId);
+  res.json(updatedPlaylist);
+});
+
+const followPlaylist = catchAsync(async (req,res,next) => {
+  const playlist = await playlistRepository.findById(req.params.id)
+
+  if(!playlist) {
+    return next(new AppError('Playlist not found', 404))
+  }
+
+  // Defensive: check if owner exists
+  if(playlist.owner && playlist.owner.toString() === req.userId){
+    return next(new AppError('You cannot follow your own playlist', 400))
+  }
+
+  if(!playlist.isPublic){
+    return next(new AppError('This playlist is private', 403))
+  }
+
+  await playlistRepository.addFollower(req.params.id, req.userId)
+  await userRepository.addFollowedPlaylist(req.userId, req.params.id)
+
+  res.json({message: 'Playlist followed successfully'})
+})
+
+const unfollowPlaylist = catchAsync(async (req, res, next) => {
+  const playlist = await playlistRepository.findById(req.params.id);
+
+  if (!playlist) {
+    return next(new AppError('Playlist not found', 404));
+  }
+
+  // Update both documents
+  await playlistRepository.removeFollower(req.params.id, req.userId);
+  await userRepository.removeFollowedPlaylist(req.userId, req.params.id);
+
+  res.json({ message: 'Playlist unfollowed successfully' });
+});
+
+const addCollaborator = catchAsync(async (req, res, next) => {
+  const { userId } = req.body;
+
+  const playlist = await playlistRepository.findById(req.params.id);
+
+  if (!playlist) {
+    return next(new AppError('Playlist not found', 404));
+  }
+
+  // Block collaboration on Sunami playlists
+  if (playlist.isSystemPlaylist) {
+    return next(new AppError('Forbidden: Sunami playlists cannot have collaborators', 403));
+  }
+
+  // Only the super owner can manage collaborators
+  if (playlist.owner.toString() !== req.userId) {
+    return next(new AppError('Forbidden: Only the playlist owner can manage collaborators', 403));
+  }
+
+  // Can't add yourself as collaborator
+  if (userId === req.userId) {
+    return next(new AppError('You are already the owner of this playlist', 400));
+  }
+
+  const updatedPlaylist = await playlistRepository.addCollaborator(req.params.id, userId);
+  res.json(updatedPlaylist);
+});
+
+const removeCollaborator = catchAsync(async (req, res, next) => {
+  const { userId } = req.body;
+
+  const playlist = await playlistRepository.findById(req.params.id);
+
+  if (!playlist) {
+    return next(new AppError('Playlist not found', 404));
+  }
+
+  // Only the super owner can manage collaborators
+  if (playlist.owner.toString() !== req.userId) {
+    return next(new AppError('Forbidden: Only the playlist owner can manage collaborators', 403));
+  }
+
+  const updatedPlaylist = await playlistRepository.removeCollaborator(req.params.id, userId);
   res.json(updatedPlaylist);
 });
 
@@ -137,5 +259,10 @@ export {
   updatePlaylist,
   deletePlaylist,
   addSongToPlaylist,
-  removeSongFromPlaylist
+  removeSongFromPlaylist,
+  followPlaylist,
+  unfollowPlaylist,
+  addCollaborator,
+  removeCollaborator,
+  getPublicPlaylists
 };

@@ -11,7 +11,8 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchArtists } from '../services/artistService'
 import { fetchAlbums } from '../services/albumService'
-import { getArtistRoute, getAlbumRoute } from '../constants/routes'
+import { getArtistRoute, getAlbumRoute, getPlaylistRoute } from '../constants/routes'
+import { useLibrary } from '../hooks/useLibrary'
 import styles from './HomePage.module.css'
 
 const HomePage = () => {
@@ -19,32 +20,38 @@ const HomePage = () => {
     const [albums, setAlbums] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const { library, loading: libraryLoading } = useLibrary()
+    const sunamiPlaylists = (library?.allPlaylists || []).filter(p => p.isSystemPlaylist)
 
     useEffect(() => {
+        const controller = new AbortController()
+        const loadData = async () => {
+            try {
+                setLoading(true)
+                setError(null)
+                
+                const [artistsData, albumsData] = await Promise.all([
+                    fetchArtists(controller.signal),
+                    fetchAlbums(controller.signal)
+                ])
+                
+                setArtists(artistsData)
+                setAlbums(albumsData)
+            } catch (err) {
+                if(err.name === 'AbortError') return
+                setError(err.message)
+                console.error('Error loading homepage data:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
         loadData()
+        return () => controller.abort()
     }, [])
 
-    const loadData = async () => {
-        try {
-            setLoading(true)
-            setError(null)
-            
-            const [artistsData, albumsData] = await Promise.all([
-                fetchArtists(),
-                fetchAlbums()
-            ])
-            
-            setArtists(artistsData)
-            setAlbums(albumsData)
-        } catch (err) {
-            setError(err.message)
-            console.error('Error loading homepage data:', err)
-        } finally {
-            setLoading(false)
-        }
-    }
 
-    if (loading) {
+
+    if (loading || libraryLoading) {
         return <div className="page">Loading...</div>
     }
 
@@ -118,6 +125,31 @@ const HomePage = () => {
                     </div>
                 ) : (
                     <p className={styles.noContent}>No albums available</p>
+                )}
+            </section>
+            {/* Sunami Playlists Section */}
+            <section className={styles.section}>
+                <h2 className={styles.sectionTitle}>Sunami Playlists</h2>
+                {sunamiPlaylists.length > 0 ? (
+                    <div className={styles.albumsGrid}>
+                        {sunamiPlaylists.map((playlist) => (
+                            <Link
+                                key={playlist._id}
+                                to={getPlaylistRoute(playlist._id)}
+                                className={styles.albumCard}
+                            >
+                                <div className={styles.albumCover} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#282828' }}>
+                                    <span className={styles.playlistIcon} style={{ fontSize: 40 }}>🎵</span>
+                                </div>
+                                <div className={styles.albumInfo}>
+                                    <h3 className={styles.albumTitle}>{playlist.name}</h3>
+                                    <p className={styles.albumArtist}>{playlist.songs?.length || 0} songs</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                ) : (
+                    <p className={styles.noContent}>No Sunami playlists available.</p>
                 )}
             </section>
         </div>

@@ -9,7 +9,9 @@ class PlaylistRepository {
   async findAll(populate = true) {
     const query = Playlist.find();
     if (populate) {
-      return await query.populate('songs');
+      return await query
+        .populate('songs')
+        .populate({ path: 'owner', select: 'username' });
     }
     return await query;
   }
@@ -23,13 +25,15 @@ class PlaylistRepository {
   async findById(id, populate = true) {
     const query = Playlist.findById(id);
     if (populate) {
-      return await query.populate({
-        path: 'songs',
-        populate: [
-          { path: 'artist', select: 'name image' },
-          { path: 'album', select: 'title coverImage' }
-        ]
-      });
+      return await query
+        .populate({
+          path: 'songs',
+          populate: [
+            { path: 'artist', select: 'name image' },
+            { path: 'album', select: 'title coverImage' }
+          ]
+        })
+        .populate({ path: 'owner', select: 'username' });
     }
     return await query;
   }
@@ -73,7 +77,9 @@ class PlaylistRepository {
    * @returns {Promise<Array>} Array med spellistor med populerade songs
    */
   async findByCreator(createdBy) {
-    return await Playlist.find({ createdBy }).populate('songs');
+    return await Playlist.find({ createdBy })
+      .populate('songs')
+      .populate({ path: 'owner', select: 'username' });
   }
 
   /**
@@ -81,7 +87,9 @@ class PlaylistRepository {
    * @returns {Promise<Array>} Array med publika spellistor med populerade songs
    */
   async findPublic() {
-    return await Playlist.find({ isPublic: true }).populate('songs');
+    return await Playlist.find({ isPublic: true })
+      .populate('songs')
+      .populate({ path: 'owner', select: 'username' });
   }
 
   /**
@@ -90,7 +98,10 @@ class PlaylistRepository {
    * @returns {Promise<Array>} Array med spellistor med populerade songs
    */
   async findByOwner(userId) {
-    return await Playlist.find({ owner: userId }).populate('songs').sort({ createdAt: -1 });
+    return await Playlist.find({ owner: userId })
+      .populate('songs')
+      .populate({ path: 'owner', select: 'username' })
+      .sort({ createdAt: -1 });
   }
 
   /**
@@ -120,6 +131,50 @@ class PlaylistRepository {
       { new: true }
     ).populate('songs');
   }
+
+  /**
+ * Lägg till följare på en spellista
+ * @param {string} playlistId - Playlist ObjectId
+ * @param {string} userId - User ObjectId
+ * @returns {Promise<Object>} Uppdaterad spellista
+ */
+async addFollower(playlistId, userId) {
+  return await Playlist.findByIdAndUpdate(
+    playlistId,
+    { $addToSet: { followers: userId } },
+    { new: true }
+  );
+}
+
+/**
+ * Ta bort följare från en spellista
+ * @param {string} playlistId - Playlist ObjectId
+ * @param {string} userId - User ObjectId
+ * @returns {Promise<Object>} Uppdaterad spellista
+ */
+async removeFollower(playlistId, userId) {
+  return await Playlist.findByIdAndUpdate(
+    playlistId,
+    { $pull: { followers: userId } },
+    { new: true }
+  );
+}
+
+async addCollaborator(playlistId, userId) {
+  return await Playlist.findByIdAndUpdate(
+    playlistId,
+    { $addToSet: { collaborators: userId } },
+    { new: true }
+  ).populate('collaborators', 'username email');
+}
+
+async removeCollaborator(playlistId, userId) {
+  return await Playlist.findByIdAndUpdate(
+    playlistId,
+    { $pull: { collaborators: userId } },
+    { new: true }
+  ).populate('collaborators', 'username email');
+}
 }
 
 export default new PlaylistRepository();

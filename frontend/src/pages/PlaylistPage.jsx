@@ -1,82 +1,134 @@
-/**
- * PlaylistPage
- * Individual playlist detail page
- */
-
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { fetchPlaylistById, deletePlaylist } from '../services/playlistService'
+import { fetchPlaylistById, deletePlaylist, followPlaylist, unfollowPlaylist, addCollaborator, removeCollaborator } from '../services/playlistService'
 import { formatDuration } from '../utils/formatDuration'
 import { formatDate } from '../utils/formatDate'
-import { formatNumberCompact } from '../utils/formatNumber'
 import { usePlayer } from '../hooks/usePlayer'
+import { useAuth } from '../hooks/useAuth'
+import { useLibrary } from '../hooks/useLibrary'
 import styles from './PlaylistPage.module.css'
 
 const PlaylistPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const { play } = usePlayer()
-    
+    const { user } = useAuth()
+    const { isPlaylistFollowed, addFollowedPlaylist, removeFollowedPlaylist } = useLibrary()
+
     const [playlist, setPlaylist] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [collaboratorInput, setCollaboratorInput] = useState('')
 
-    useEffect(() => {
-        loadPlaylistData()
-    }, [id])
-
-    const loadPlaylistData = async () => {
+    // Move loadPlaylistData outside useEffect for reuse
+    const loadPlaylistData = async (signal) => {
         try {
             setLoading(true)
             setError(null)
-            
-            const playlistData = await fetchPlaylistById(id)
+            const playlistData = await fetchPlaylistById(id, signal)
             setPlaylist(playlistData)
         } catch (err) {
+            if (err.name === 'AbortError') return
             setError(err.message)
-            console.error('Error fetching playlist:', err)
         } finally {
             setLoading(false)
         }
     }
 
-    const handleSongClick = (song, index) => {
+    useEffect(() => {
+        const controller = new AbortController()
+        loadPlaylistData(controller.signal)
+        return () => controller.abort()
+    }, [id])
+
+    // Defensive: handle owner as object or string or null
+    let ownerId = null
+    if (playlist && playlist.owner) {
+        if (typeof playlist.owner === 'object' && playlist.owner._id) {
+            ownerId = String(playlist.owner._id)
+        } else {
+            ownerId = String(playlist.owner)
+        }
+    }
+    const isOwner = user && ownerId && String(ownerId) === String(user.id)
+    const isCollaborator = user && playlist?.collaborators?.some(c => c._id === user.id)
+    const isSystemPlaylist = playlist?.isSystemPlaylist
+    const canManageSongs = (isOwner || isCollaborator) && !isSystemPlaylist
+    const followed = isPlaylistFollowed(id)
+
+    const handleSongClick = (song) => {
         play(song, playlist.songs)
     }
 
     const handleDelete = async () => {
-        if (!window.confirm('Are you sure you want to delete this playlist?')) {
-            return
-        }
-
+        if (!window.confirm('Are you sure you want to delete this playlist?')) return
         try {
             await deletePlaylist(id)
             navigate('/library')
         } catch (err) {
             alert('Failed to delete playlist: ' + err.message)
-            console.error('Error deleting playlist:', err)
         }
     }
 
-    if (loading) {
-        return <div className={styles.playlistPage}>Loading playlist...</div>
+    const handleFollow = async () => {
+        try {
+            await followPlaylist(id)
+            addFollowedPlaylist(id)
+        } catch (err) {
+            alert('Failed to follow playlist: ' + err.message)
+        }
     }
 
-    if (error) {
-        return (
-            <div className={styles.playlistPage}>
-                <p>Error: {error}</p>
-                <button onClick={loadPlaylistData}>Try Again</button>
-            </div>
-        )
+    const handleUnfollow = async () => {
+        try {
+            await unfollowPlaylist(id)
+            removeFollowedPlaylist(id)
+        } catch (err) {
+            alert('Failed to unfollow playlist: ' + err.message)
+        }
     }
 
-    if (!playlist) {
-        return <div className={styles.playlistPage}>Playlist not found</div>
+    const handleAddCollaborator = async () => {
+        if (!collaboratorInput.trim()) return
+        try {
+            await addCollaborator(id, collaboratorInput.trim())
+            setCollaboratorInput('')
+            await loadPlaylistData() // Refresh to show new collaborator
+        } catch (err) {
+            alert('Failed to add collaborator: ' + err.message)
+        }
     }
 
-    const songs = playlist.songs || []
+    const handleRemoveCollaborator = async (userId) => {
+        try {
+            await removeCollaborator(id, userId)
+            await loadPlaylistData()
+        } catch (err) {
+            alert('Failed to remove collaborator: ' + err.message)
+        }
+    }
+
+    if (loading) return <div className={styles.playlistPage}>Loading playlist...</div>
+    if (error) return (
+        <div className={styles.playlistPage}>
+            <p>Error: {error}</p>
+            <button onClick={() => loadPlaylistData()}>Try Again</button>
+        </div>
+    )
+    if (!playlist) return <div className={styles.playlistPage}>Playlist not found</div>
+
+
+    // Defensive: Only use valid songs with _id
+    const songs = Array.isArray(playlist.songs)
+        ? playlist.songs.filter(song => song && song._id)
+        : []
+
     const totalDuration = songs.reduce((acc, song) => acc + (song.duration || 0), 0)
+    const ownerName = isSystemPlaylist
+        ? 'Sunami'
+        : (playlist.owner && typeof playlist.owner === 'object' && playlist.owner.username)
+            ? playlist.owner.username
+            : 'Unknown'
 
     return (
         <div className={styles.playlistPage}>
@@ -86,13 +138,15 @@ const PlaylistPage = () => {
                     <span className={styles.playlistIcon}>🎵</span>
                 </div>
                 <div className={styles.playlistInfo}>
-                    <p className={styles.playlistType}>Playlist</p>
+                    <p className={styles.playlistType}>
+                        {isSystemPlaylist ? 'Sunami Playlist' : 'Playlist'}
+                    </p>
                     <h1 className={styles.playlistTitle}>{playlist.name}</h1>
                     {playlist.description && (
                         <p className={styles.playlistDescription}>{playlist.description}</p>
                     )}
                     <div className={styles.playlistMeta}>
-                        <span className={styles.playlistOwner}>{playlist.createdBy || 'Unknown'}</span>
+                        <span className={styles.playlistOwner}>{ownerName}</span>
                         <span>•</span>
                         <span>{songs.length} {songs.length === 1 ? 'song' : 'songs'}</span>
                         {totalDuration > 0 && (
@@ -108,26 +162,64 @@ const PlaylistPage = () => {
             {/* Actions */}
             <div className={styles.actions}>
                 {songs.length > 0 && (
-                    <button 
-                        className={styles.playButton}
-                        onClick={() => play(songs[0], songs)}
-                    >
+                    <button className={styles.playButton} onClick={() => play(songs[0], songs)}>
                         ▶ Play
                     </button>
                 )}
-                <button 
-                    className={styles.deleteButton}
-                    onClick={handleDelete}
-                >
-                    Delete Playlist
-                </button>
+
+                {/* Follow/Unfollow — shown to logged-in non-owners */}
+                {user && !isOwner && (
+                    followed
+                        ? <button className={`${styles.followButton} ${styles.following}`} onClick={handleUnfollow}>Unfollow</button>
+                        : <button className={styles.followButton} onClick={handleFollow}>Follow</button>
+                )}
+                {/* Delete — owner only */}
+                {isOwner && (
+                    <button className={styles.deleteButton} onClick={handleDelete}>
+                        Delete Playlist
+                    </button>
+                )}
+
             </div>
 
-            {/* Songs Content */}
+            {/* Collaborator Management — owner only, not on system playlists */}
+            {isOwner && !isSystemPlaylist && (
+                <div className={styles.collaborators}>
+                    <h3>Collaborators</h3>
+
+                    {/* Current collaborators */}
+                    {playlist.collaborators?.length > 0 ? (
+                        <ul className={styles.collaboratorList}>
+                            {playlist.collaborators.map(c => (
+                                <li key={c._id} className={styles.collaboratorItem}>
+                                    <span>{c.username}</span>
+                                    <button onClick={() => handleRemoveCollaborator(c._id)}>
+                                        Remove
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No collaborators yet</p>
+                    )}
+
+                    {/* Add collaborator by user ID */}
+                    <div className={styles.addCollaborator}>
+                        <input
+                            type="text"
+                            placeholder="Enter user ID"
+                            value={collaboratorInput}
+                            onChange={(e) => setCollaboratorInput(e.target.value)}
+                        />
+                        <button onClick={handleAddCollaborator}>Add</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Songs */}
             <div className={styles.playlistContent}>
                 {songs.length > 0 ? (
                     <div className={styles.songsTable}>
-                        {/* Table Header */}
                         <div className={styles.songsHeader}>
                             <span className={styles.headerNumber}>#</span>
                             <span className={styles.headerTitle}>Title</span>
@@ -135,29 +227,19 @@ const PlaylistPage = () => {
                             <span className={styles.headerDate}>Date Added</span>
                             <span className={styles.headerDuration}>Duration</span>
                         </div>
-                        
-                        {/* Song Rows */}
                         <div className={styles.songsList}>
                             {songs.map((song, index) => (
-                                <div 
-                                    key={song._id} 
-                                    className={styles.songItem}
-                                >
+                                <div key={song._id} className={styles.songItem}>
                                     <span className={styles.songNumber}>{index + 1}</span>
                                     <div className={styles.songInfo}>
-                                        <div 
-                                            className={styles.songTitle}
-                                            onClick={() => handleSongClick(song, index)}
-                                        >
+                                        <div className={styles.songTitle} onClick={() => handleSongClick(song)}>
                                             {song.title}
                                         </div>
                                         <div className={styles.songArtist}>
                                             {song.artist?.name || 'Unknown Artist'}
                                         </div>
                                     </div>
-                                    <div className={styles.songAlbum}>
-                                        {song.album?.title || '-'}
-                                    </div>
+                                    <div className={styles.songAlbum}>{song.album?.title || '-'}</div>
                                     <div className={styles.songDate}>
                                         {song.createdAt ? formatDate(song.createdAt) : '-'}
                                     </div>

@@ -41,7 +41,12 @@ const userSchema = new mongoose.Schema({
     followedArtists: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Artist'
-    }]
+    }],
+    followedPlaylists: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Playlist'
+}]
+
 }, {timestamps:true}
 )
 

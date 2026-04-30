@@ -226,8 +226,49 @@ class UserRepository {
         path: 'savedAlbums',
         populate: { path: 'artist', select: 'name' }
       })
-      .populate('followedArtists');
+      .populate('followedArtists')
+      .populate({
+        path: 'followedPlaylists',
+        populate: [
+          {
+            path: 'songs',
+            populate: [
+              { path: 'artist', select: 'name image' },
+              { path: 'album', select: 'title coverImage' }
+            ]
+          }
+        ]
+      })
   }
+
+    /**
+   * Följ en spellista
+   * @param {string} userId - User ObjectId
+   * @param {string} playlistId - Playlist ObjectId
+   * @returns {Promise<Object>} Uppdaterat användardokument
+   */
+  async addFollowedPlaylist(userId, playlistId) {
+    return await User.findByIdAndUpdate(
+      userId,
+      {$addToSet: {followedPlaylists: playlistId}},
+      {new: true}
+    ).populate('followedPlaylists')
+  }
+      /**
+   * Sluta följa en spellista
+   * @param {string} userId - User ObjectId
+   * @param {string} playlistId - Playlist ObjectId
+   * @returns {Promise<Object>} Uppdaterat användardokument
+   */
+  async removeFollowedPlaylist(userId, playlistId){
+     return await User.findByIdAndUpdate(
+      userId,
+      { $pull: {followedPlaylists: playlistId}},
+      {new: true}
+     ).populate('followedPlaylists')
+  }
+   
+  
 }
 
 export default new UserRepository();

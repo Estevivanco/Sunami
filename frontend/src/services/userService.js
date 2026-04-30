@@ -68,8 +68,8 @@ export const deleteAccount = async () => {
  */
 
 // Get user's library (liked songs, saved albums, followed artists)
-export const getUserLibrary = async () => {
-    return await get(`${BASE_URL}/users/me/library`)
+export const getUserLibrary = async (signal) => {
+    return await get(`${BASE_URL}/users/me/library`, signal)
 }
 
 // Song library operations

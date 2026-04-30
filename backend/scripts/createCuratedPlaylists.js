@@ -28,7 +28,7 @@ async function createCuratedPlaylists() {
     }
 
     // Delete existing curated playlists
-    await Playlist.deleteMany({ createdBy: admin._id });
+    await Playlist.deleteMany({ owner: admin._id, isSystemPlaylist: true});
     console.log('🗑️  Cleared existing curated playlists\n');
 
     // Get all songs
@@ -114,9 +114,10 @@ async function createCuratedPlaylists() {
       const playlist = await Playlist.create({
         name: config.name,
         description: config.description,
-        createdBy: admin._id,
+        owner: admin._id,
         songs: config.songs.map(s => s._id),
-        isPublic: true
+        isPublic: true,
+        isSystemPlaylist: true
       });
 
       createdPlaylists.push(playlist);

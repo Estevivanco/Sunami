@@ -21,9 +21,11 @@ app.use(cors({
 }));
 
 // Rate limiting middleware
+
+// Relaxed for development: 1000 requests per 15 min
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minuter
-  max: 100, // Max 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Max 1000 requests per windowMs
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false
@@ -31,9 +33,10 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Striktare rate limit för auth-routes
+// Relaxed for development: 20 auth requests per 15 min
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minuter
-  max: 5, // Max 5 requests per windowMs
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Max 20 requests per windowMs
   message: 'Too many authentication attempts, please try again later.',
   standardHeaders: true,
   legacyHeaders: false

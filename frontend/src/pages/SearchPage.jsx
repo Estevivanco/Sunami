@@ -1,15 +1,10 @@
-/**
- * SearchPage
- * Search for songs, albums, artists
- */
-
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { searchSongs } from '../services/songService'
 import { fetchArtists } from '../services/artistService'
 import { fetchAlbums } from '../services/albumService'
 import { likeSong, unlikeSong } from '../services/userService'
-import { getArtistRoute, getAlbumRoute } from '../constants/routes'
+import { getArtistRoute, getAlbumRoute, getPlaylistRoute } from '../constants/routes'
 import { formatDuration } from '../utils/formatDuration'
 import { usePlayer } from '../hooks/usePlayer'
 import { useAuth } from '../hooks/useAuth'
@@ -19,6 +14,7 @@ import styles from './SearchPage.module.css'
 
 const SearchPage = () => {
     const [searchQuery, setSearchQuery] = useState('')
+    const [browseCategory, setBrowseCategory] = useState(null)
     const [searchResults, setSearchResults] = useState([])
     const [allArtists, setAllArtists] = useState([])
     const [allAlbums, setAllAlbums] = useState([])
@@ -28,11 +24,35 @@ const SearchPage = () => {
     const [selectedSong, setSelectedSong] = useState(null)
     const { play } = usePlayer()
     const { user } = useAuth()
-    const { isSongLiked, addLikedSong, removeLikedSong } = useLibrary()
+    const { isSongLiked, addLikedSong, removeLikedSong, library } = useLibrary()
+    const sunamiPlaylists = (library?.allPlaylists || []).filter(p => p.isSystemPlaylist)
+    const publicUserPlaylists = (library?.allPlaylists || []).filter(
+        p => !p.isSystemPlaylist && p.isPublic
+    )
 
-    // Load browse all data on mount
+    const filteredPlaylists = searchQuery.trim()
+        ? publicUserPlaylists.filter(p =>
+            p.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        : []
+
     useEffect(() => {
+        const controller = new AbortController()
+        const loadBrowseData = async () => {
+            try {
+                const [artists, albums] = await Promise.all([
+                    fetchArtists(controller.signal),
+                    fetchAlbums(controller.signal)
+                ])
+                setAllArtists(artists)
+                setAllAlbums(albums)
+            } catch (err) {
+                if(err.name === 'AbortError') return
+                console.error('Error loading browse data:', err)
+            }
+        }
         loadBrowseData()
+        return () => controller.abort()
     }, [])
 
     // Debounced search
@@ -49,18 +69,6 @@ const SearchPage = () => {
         return () => clearTimeout(timer)
     }, [searchQuery])
 
-    const loadBrowseData = async () => {
-        try {
-            const [artists, albums] = await Promise.all([
-                fetchArtists(),
-                fetchAlbums()
-            ])
-            setAllArtists(artists)
-            setAllAlbums(albums)
-        } catch (err) {
-            console.error('Error loading browse data:', err)
-        }
-    }
 
     const performSearch = async () => {
         try {
@@ -109,9 +117,9 @@ const SearchPage = () => {
     const clearSearch = () => {
         setSearchQuery('')
         setSearchResults([])
+        setBrowseCategory(null)
     }
-
-    // Filter artists and albums based on search query
+    
     const filteredArtists = searchQuery.trim() 
         ? allArtists.filter(artist => 
             artist.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -144,10 +152,9 @@ const SearchPage = () => {
             </div>
 
             {/* Show browse all when no search */}
-            {!searchQuery.trim() && (
+            {!searchQuery.trim() && !browseCategory && (
                 <div className={styles.browseSection}>
                     <h2 className={styles.sectionTitle}>Browse All</h2>
-                    
                     <div className={styles.categoryGrid}>
                         <div className={styles.categoryCard} style={{ backgroundColor: '#1db954' }}>
                             <h3>Artists</h3>
@@ -158,11 +165,120 @@ const SearchPage = () => {
                         <div className={styles.categoryCard} style={{ backgroundColor: '#8d67ab' }}>
                             <h3>Songs</h3>
                         </div>
-                        <div className={styles.categoryCard} style={{ backgroundColor: '#bc5900' }}>
+                        <div
+                            className={styles.categoryCard}
+                            style={{ backgroundColor: '#bc5900', cursor: 'pointer' }}
+                            onClick={() => setBrowseCategory('playlists')}
+                        >
                             <h3>Playlists</h3>
                         </div>
                     </div>
+                    {/* Sunami Playlists Section */}
+                    {sunamiPlaylists.length > 0 && (
+                        <div className={styles.sunamiSection}>
+                            <h2 className={styles.sectionTitle}>Sunami Playlists</h2>
+                            <div className={styles.albumsGrid}>
+                                {sunamiPlaylists.map((playlist) => (
+                                    <Link
+                                        key={playlist._id}
+                                        to={getPlaylistRoute(playlist._id)}
+                                        className={styles.albumCard}
+                                    >
+                                        <div className={styles.albumCover} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#282828' }}>
+                                            <span className={styles.playlistIcon} style={{ fontSize: 40 }}>🎵</span>
+                                        </div>
+                                        <div className={styles.albumInfo}>
+                                            <h3 className={styles.albumTitle}>{playlist.name}</h3>
+                                            <p className={styles.albumArtist}>{playlist.songs?.length || 0} songs</p>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
+            )}
+
+            {/* Show all public playlists if Playlists category is selected */}
+            {!searchQuery.trim() && browseCategory === 'playlists' && (
+                <div className={styles.browseSection}>
+                    <div style={{ marginBottom: 0 }}>
+                        <button className={styles.backButton} onClick={() => setBrowseCategory(null)}>
+                            <span style={{ fontSize: 20, lineHeight: 1 }}>←</span>
+                            Back
+                        </button>
+                    </div>
+                    <h2 className={styles.sectionTitle}>All Public Playlists</h2>
+                    <div className={styles.albumsGrid}>
+                        {publicUserPlaylists.length === 0 && <p>No public playlists found.</p>}
+                        {publicUserPlaylists.map((playlist) => (
+                            <Link
+                                key={playlist._id}
+                                to={getPlaylistRoute(playlist._id)}
+                                className={styles.albumCard}
+                            >
+                                {/* Playlist cover image or fallback */}
+                                <div className={styles.albumCover} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#282828' }}>
+                                    <span className={styles.playlistIcon} style={{ fontSize: 40 }}>🎵</span>
+                                </div>
+                                <div className={styles.albumInfo}>
+                                    <h3 className={styles.albumTitle}>{playlist.name}</h3>
+                                    <p className={styles.albumArtist}>By {playlist.owner?.username || 'Unknown'}</p>
+                                    <p className={styles.albumArtist}>{playlist.songs?.length || 0} songs</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+            {/* User Public Playlists in search results */}
+            {searchQuery.trim() && !loading && !error && filteredPlaylists.length > 0 && (
+                <section className={styles.resultCategory}>
+                    <h2 className={styles.categoryTitle}>Playlists</h2>
+                    <div className={styles.albumsGrid}>
+                        {filteredPlaylists.map((playlist) => (
+                            <Link
+                                key={playlist._id}
+                                to={getPlaylistRoute(playlist._id)}
+                                className={styles.albumCard}
+                            >
+                                <div className={styles.albumCover} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#282828' }}>
+                                    <span className={styles.playlistIcon} style={{ fontSize: 40 }}>🎵</span>
+                                </div>
+                                <div className={styles.albumInfo}>
+                                    <h3 className={styles.albumTitle}>{playlist.name}</h3>
+                                    <p className={styles.albumArtist}>By {playlist.owner?.username || 'Unknown'}</p>
+                                    <p className={styles.albumArtist}>{playlist.songs?.length || 0} songs</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+            )}
+            {/* Sunami Playlists in search results */}
+            {searchQuery.trim() && !loading && !error && sunamiPlaylists.length > 0 && (
+                <section className={styles.resultCategory}>
+                    <h2 className={styles.categoryTitle}>Sunami Playlists</h2>
+                    <div className={styles.grid}>
+                        {sunamiPlaylists
+                            .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                            .map((playlist) => (
+                                <Link
+                                    key={playlist._id}
+                                    to={getPlaylistRoute(playlist._id)}
+                                    className={styles.card}
+                                >
+                                    <div className={styles.playlistCover}>
+                                        <span className={styles.playlistIcon}>🎵</span>
+                                    </div>
+                                    <div className={styles.cardInfo}>
+                                        <h3 className={styles.cardTitle}>{playlist.name}</h3>
+                                        <p className={styles.cardMeta}>{playlist.songs?.length || 0} songs</p>
+                                    </div>
+                                </Link>
+                            ))}
+                    </div>
+                </section>
             )}
 
             {/* Search Results */}

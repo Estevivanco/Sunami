@@ -15,7 +15,12 @@ class ArtistRepository {
    * @returns {Promise<Object|null>} Artistdokument eller null om inte hittat
    */
   async findById(id) {
-    return await Artist.findById(id);
+    try {
+      return await Artist.findById(id);
+    } catch (error) {
+      // Return null for invalid ObjectId format
+      return null;
+    }
   }
 
   /**

@@ -15,9 +15,17 @@ const playlistSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Song'
   }],
-  createdBy: {
-    type: String,
-    trim: true,
+  collaborators: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  followers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Users'
+  }],
+  isSystemPlaylist: {
+    type: Boolean,
+    default: false
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

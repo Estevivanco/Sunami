@@ -1,11 +1,7 @@
-/**
- * Library Context
- * Manages user's library state (liked songs, saved albums, followed artists)
- */
-
 import { createContext, useState, useEffect, useContext } from 'react'
 import { getUserLibrary } from '../services/userService'
 import { useAuth } from '../hooks/useAuth'
+import { fetchMyPlaylists, fetchPlaylists, fetchPublicPlaylists } from '../services/playlistService'
 
 const LibraryContext = createContext()
 
@@ -14,36 +10,55 @@ export const LibraryProvider = ({ children }) => {
     const [library, setLibrary] = useState({
         likedSongs: [],
         savedAlbums: [],
-        followedArtists: []
+        followedArtists: [],
+        followedPlaylists: [],
+        playlist: []
     })
     const [loading, setLoading] = useState(true)
 
-    // Fetch library when user is authenticated
-    useEffect(() => {
-        const fetchLibrary = async () => {
-            if (!user) {
-                setLibrary({
-                    likedSongs: [],
-                    savedAlbums: [],
-                    followedArtists: []
-                })
-                setLoading(false)
-                return
-            }
-
-            try {
-                setLoading(true)
-                const data = await getUserLibrary()
-                setLibrary(data)
-            } catch (error) {
-                console.error('Failed to fetch library:', error)
-            } finally {
-                setLoading(false)
-            }
+   useEffect(() => {
+    const fetchLibrary = async () => {
+        if (!user) {
+            setLibrary({
+                likedSongs: [],
+                savedAlbums: [],
+                followedArtists: [],
+                followedPlaylists: [],
+                playlists: [],
+                allPlaylists: []
+            })
+            setLoading(false)
+            return
         }
+        try {
+            setLoading(true)
+            const [libraryData, playlistsData, publicPlaylistsData] = await Promise.all([
+                getUserLibrary(),
+                fetchMyPlaylists(),
+                fetchPublicPlaylists()
+            ])
+            setLibrary({
+                ...libraryData,
+                followedPlaylists: libraryData.followedPlaylists || [],
+                playlists: playlistsData || [],
+                allPlaylists: publicPlaylistsData || []
+            })
+        } catch (error) {
+            console.error('Failed to fetch library:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
-        fetchLibrary()
-    }, [user])
+    fetchLibrary()
+}, [user])
+
+    const addPlaylist = (playlist) => {
+    setLibrary(prev => ({
+        ...prev,
+        playlists: [playlist, ...prev.playlists]
+    }))
+}
 
     // Helper function to check if a song is liked
     const isSongLiked = (songId) => {
@@ -120,6 +135,30 @@ export const LibraryProvider = ({ children }) => {
         }))
     }
 
+    // 2. Add helper — same pattern as isArtistFollowed
+    const isPlaylistFollowed = (playlistId) => {
+    return library.followedPlaylists?.some(playlist =>
+        playlist._id === playlistId || playlist === playlistId
+    )
+    }
+
+    // 3. Add updaters — same pattern as artist ones
+    const addFollowedPlaylist = (playlistId) => {
+    setLibrary(prev => ({
+        ...prev,
+        followedPlaylists: [...prev.followedPlaylists, playlistId]
+    }))
+    }
+
+    const removeFollowedPlaylist = (playlistId) => {
+    setLibrary(prev => ({
+        ...prev,
+        followedPlaylists: prev.followedPlaylists.filter(id =>
+            (id._id || id) !== playlistId
+        )
+    }))
+    }
+
     const value = {
         library,
         loading,
@@ -131,7 +170,11 @@ export const LibraryProvider = ({ children }) => {
         addSavedAlbum,
         removeSavedAlbum,
         addFollowedArtist,
-        removeFollowedArtist
+        removeFollowedArtist,
+        isPlaylistFollowed,
+        addFollowedPlaylist,
+        removeFollowedPlaylist,
+        addPlaylist
     }
 
     return (

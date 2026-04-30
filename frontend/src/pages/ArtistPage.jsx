@@ -61,31 +61,34 @@ const ArtistPage = () => {
   const [selectedSong, setSelectedSong] = useState(null)
 
   useEffect(() => {
-    loadArtistData()
-  }, [id]) // Reload when ID changes
-
-  const loadArtistData = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      // Fetch artist details, songs, and albums in parallel
-      const [artistData, songsData, albumsData] = await Promise.all([
-        fetchArtistsById(id),
-        fetchArtistsByIdWithSongs(id),
-        fetchArtistsByIdWithAlbums(id)
-      ])
-      
-      setArtist(artistData)
-      setSongs(songsData.songs || []) // Extract songs array from response object
-      setAlbums(albumsData || []) // Albums response is already an array
-    } catch (err) {
-      setError(err.message)
-      console.error('Error fetching artist:', err)
-    } finally {
-      setLoading(false)
+    const controller = new AbortController()
+    const loadArtistData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        // Fetch artist details, songs, and albums in parallel
+        const [artistData, songsData, albumsData] = await Promise.all([
+          fetchArtistsById(id, controller.signal),
+          fetchArtistsByIdWithSongs(id, controller.signal),
+          fetchArtistsByIdWithAlbums(id, controller.signal)
+        ])
+        
+        setArtist(artistData)
+        setSongs(songsData.songs || [])
+        setAlbums(albumsData || [])
+      } catch (err) {
+        if(err.name === 'AbortError') return
+        setError(err.message)
+        console.error('Error fetching artist:', err)
+      } finally {
+        setLoading(false)
+      }
     }
-  }
+    loadArtistData()
+    return () => controller.abort()
+  }, [id])
+
 
   if (loading) {
     return <div className="page">Loading artist...</div>

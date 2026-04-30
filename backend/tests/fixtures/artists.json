@@ -1,0 +1,29 @@
+[
+  {
+    "name": "The Beatles",
+    "genres": ["Rock", "Pop"],
+    "country": "UK",
+    "bio": "Legendary British rock band",
+    "verified": true,
+    "monthlyListeners": 50000000,
+    "followers": 30000000
+  },
+  {
+    "name": "Radiohead",
+    "genres": ["Alternative", "Rock"],
+    "country": "UK",
+    "bio": "English rock band formed in 1985",
+    "verified": true,
+    "monthlyListeners": 25000000,
+    "followers": 15000000
+  },
+  {
+    "name": "Pink Floyd",
+    "genres": ["Progressive Rock", "Psychedelic"],
+    "country": "UK",
+    "bio": "Progressive rock pioneers",
+    "verified": true,
+    "monthlyListeners": 40000000,
+    "followers": 25000000
+  }
+]

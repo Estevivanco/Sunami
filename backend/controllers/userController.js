@@ -4,6 +4,7 @@ import AppError from '../utils/AppError.js';
 import Song from '../models/Song.js';
 import Album from '../models/Album.js';
 import Artist from '../models/Artist.js';
+import { followPlaylist } from './playlistController.js';
 
 /**
  * User Management Controller
@@ -127,7 +128,8 @@ const getUserLibrary = catchAsync(async (req, res, next) => {
   res.json({
     likedSongs: library.likedSongs || [],
     savedAlbums: library.savedAlbums || [],
-    followedArtists: library.followedArtists || []
+    followedArtists: library.followedArtists || [],
+    followedPlaylists: library.followedPlaylists || []
   });
 });
 

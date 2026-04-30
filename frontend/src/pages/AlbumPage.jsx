@@ -56,25 +56,26 @@ const AlbumPage = () => {
     const [selectedSong, setSelectedSong] = useState(null)
 
     useEffect(() => {
+        const controller = new AbortController()
+        const loadAlbumData = async () => {
+            try {
+              setLoading(true)
+              setError(null)
+              const albumData = await fetchAlbumsByIdWithSongs(id, controller.signal)
+              console.log(albumData)
+              setAlbum(albumData)
+            } catch (err) {
+            if (err.name === 'AbortError') return
+              setError(err.message)
+              console.error('Error fetching album:', err)
+            } finally {
+              setLoading(false)
+            }
+          }
         loadAlbumData()
-    }, [id]) // Reload when album ID changes
+        return () => controller.abort()
+    }, [id])
 
-    const loadAlbumData = async () => {
-        try {
-          setLoading(true)
-          setError(null)
-          
-          // Fetch album with songs using the ID from URL
-          const albumData = await fetchAlbumsByIdWithSongs(id)
-          console.log(albumData)
-          setAlbum(albumData)
-        } catch (err) {
-          setError(err.message)
-          console.error('Error fetching album:', err)
-        } finally {
-          setLoading(false)
-        }
-      }
 
     if (loading) {
         return <div className="page">Loading album...</div>

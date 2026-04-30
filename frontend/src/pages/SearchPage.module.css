@@ -1,3 +1,27 @@
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #181818;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 8px 18px 8px 12px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  margin-left: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.backButton:hover {
+  background: #282828;
+  color: #1db954;
+}
 /* SearchPage Component */
 .searchPage {
   padding: 24px;
