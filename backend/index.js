@@ -112,3 +112,5 @@ process.on('uncaughtException', (err) => {
 
 // Initiera server
 startServer();
+
+export default app;

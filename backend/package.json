@@ -20,6 +20,9 @@
     "generate:secrets": "node scripts/generateSecrets.js",
     "seed:playlists": "node scripts/createCuratedPlaylists.js"
   },
+  "engines": {
+    "node": ">=18.x"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
