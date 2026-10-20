@@ -19,19 +19,8 @@
     width: 100%;
     aspect-ratio: 1;
     border-radius: var(--radius);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-}
-
-.imageWrapper.round {
-    border-radius: 50%;
-}
-
-/* Clips the image only — the play button lives outside so it is never cut off */
-.imageClip {
-    width: 100%;
-    height: 100%;
-    border-radius: inherit;
     overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 .image {
@@ -73,11 +62,6 @@
 .card:hover .playBtn {
     opacity: 1;
     transform: translateY(0);
-}
-
-.imageWrapper.round .playBtn {
-    bottom: 2px;
-    right: 2px;
 }
 
 .playBtn:hover {

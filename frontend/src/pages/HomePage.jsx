@@ -108,7 +108,6 @@ const HomePage = () => {
                                 image={artist.image}
                                 title={artist.name}
                                 subtitle="Artist"
-                                round
                             />
                         ))}
                     </div>
