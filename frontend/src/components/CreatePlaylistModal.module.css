@@ -15,8 +15,8 @@
 
 /* Modal Content */
 .modalContent {
-  background: #282828;
-  border-radius: 8px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
@@ -30,7 +30,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid #404040;
+  border-bottom: 1px solid var(--border-strong);
 }
 
 .modalHeader h2 {
@@ -43,7 +43,7 @@
 .closeButton {
   background: none;
   border: none;
-  color: #b3b3b3;
+  color: var(--text-muted);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
@@ -67,10 +67,10 @@
 
 .error {
   background: rgba(230, 75, 56, 0.1);
-  border: 1px solid #e64b38;
-  color: #e64b38;
+  border: 1px solid var(--danger);
+  color: var(--danger);
   padding: 0.75rem 1rem;
-  border-radius: 4px;
+  border-radius: var(--radius);
   margin-bottom: 1rem;
   font-size: 0.875rem;
 }
@@ -91,10 +91,10 @@
 .textarea {
   width: 100%;
   background: #000;
-  border: 1px solid #404040;
+  border: 1px solid var(--border-strong);
   color: #fff;
   padding: 0.75rem 1rem;
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-size: 1rem;
   font-family: inherit;
   transition:
@@ -104,13 +104,13 @@
 
 .input::placeholder,
 .textarea::placeholder {
-  color: #727272;
+  color: var(--text-subtle);
 }
 
 .input:focus,
 .textarea:focus {
   outline: none;
-  border-color: #1ed760;
+  border-color: var(--accent-bright);
   box-shadow: 0 0 0 3px rgba(30, 215, 96, 0.1);
 }
 
@@ -137,7 +137,7 @@
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #1ed760;
+  accent-color: var(--accent-bright);
 }
 
 .checkbox:disabled {
@@ -147,7 +147,7 @@
 
 .checkboxLabel {
   font-size: 0.9375rem;
-  color: #b3b3b3;
+  color: var(--text-muted);
   cursor: pointer;
   user-select: none;
 }
@@ -163,7 +163,7 @@
 .cancelButton,
 .createButton {
   padding: 0.75rem 2rem;
-  border-radius: 500px;
+  border-radius: var(--radius-pill);
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
@@ -175,8 +175,8 @@
 
 .cancelButton {
   background: transparent;
-  color: #b3b3b3;
-  border: 1px solid #b3b3b3;
+  color: var(--text-muted);
+  border: 1px solid var(--text-muted);
 }
 
 .cancelButton:hover:not(:disabled) {
@@ -186,12 +186,12 @@
 }
 
 .createButton {
-  background: #1ed760;
+  background: var(--accent-bright);
   color: #000;
 }
 
 .createButton:hover:not(:disabled) {
-  background: #1fdf64;
+  background: var(--accent-bright);
   transform: scale(1.04);
 }
 

@@ -8,14 +8,14 @@
   align-items: flex-end;
   gap: 24px;
   padding: 24px 32px 32px;
-  background: linear-gradient(180deg, #535353 0%, #121212 100%);
+  background: linear-gradient(180deg, var(--border-strong) 0%, var(--bg-elevated) 100%);
   min-height: 340px;
 }
 
 .albumCover {
   width: 232px;
   height: 232px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   object-fit: cover;
   box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
 }
@@ -63,21 +63,21 @@
 
 .albumYear,
 .albumCount {
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .albumMeta .albumYear::before,
 .albumMeta .albumCount::before {
   content: "•";
   margin-right: 8px;
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .saveAlbumButton {
   margin-top: 16px;
   padding: 8px 24px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: #fff;
   font-size: 14px;
@@ -93,8 +93,8 @@
 }
 
 .saveAlbumButton.saved {
-  background: #1db954;
-  border-color: #1db954;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .albumContent {
@@ -117,7 +117,7 @@
 .tracksHeader span {
   font-size: 12px;
   font-weight: 400;
-  color: #b3b3b3;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -154,7 +154,7 @@
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   transition: background-color 0.2s;
 }
 
@@ -165,7 +165,7 @@
 .trackNumber {
   text-align: center;
   font-size: 16px;
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .trackInfo {
@@ -187,20 +187,20 @@
 }
 
 .trackItem:hover .trackTitle {
-  color: #1ed760;
+  color: var(--accent-bright);
 }
 
 .trackItem:active .trackTitle {
-  color: #1db954;
+  color: var(--accent);
 }
 
 .isPlaying .trackTitle {
-  color: #1ed760;
+  color: var(--accent-bright);
 }
 
 .trackArtist {
   font-size: 14px;
-  color: #b3b3b3;
+  color: var(--text-muted);
   text-decoration: none;
   cursor: pointer;
   transition: color 0.2s;
@@ -213,30 +213,38 @@
 
 .trackDate {
   font-size: 14px;
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .trackPlayCount {
   font-size: 14px;
-  color: #b3b3b3;
+  color: var(--text-muted);
   text-align: right;
 }
 
 .trackDuration {
   text-align: right;
   font-size: 14px;
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .trackActions {
   display: flex;
   align-items: center;
   gap: 12px;
-  opacity: 0;
-  transition: opacity 0.2s;
 }
 
-.trackItem:hover .trackActions {
+/* Liked hearts stay visible; other actions appear on row hover/focus */
+.trackActions .addButton,
+.trackActions .iconButton:not(.liked) {
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.trackItem:hover .trackActions .addButton,
+.trackItem:hover .trackActions .iconButton,
+.trackActions .addButton:focus-visible,
+.trackActions .iconButton:focus-visible {
   opacity: 1;
 }
 
@@ -248,7 +256,7 @@
   border-radius: 50%;
   border: none;
   background: transparent;
-  color: #b3b3b3;
+  color: var(--text-muted);
   font-size: 18px;
   font-weight: 400;
   line-height: 1;
@@ -272,7 +280,7 @@
 }
 
 .iconButton.liked {
-  color: #1db954;
+  color: var(--accent);
   opacity: 1;
 }
 
@@ -284,7 +292,7 @@
   border-radius: 50%;
   border: none;
   background: transparent;
-  color: #b3b3b3;
+  color: var(--text-muted);
   font-size: 18px;
   font-weight: 400;
   line-height: 1;
@@ -308,7 +316,7 @@
 }
 
 .noContent {
-  color: #b3b3b3;
+  color: var(--text-muted);
   font-size: 16px;
   padding: 32px 0;
   text-align: center;

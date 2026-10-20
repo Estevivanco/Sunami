@@ -1,7 +1,7 @@
 /* Sidebar Component */
 .sidebar {
   grid-area: sidebar;
-  background: linear-gradient(180deg, #121212 0%, #000 100%);
+  background: linear-gradient(180deg, var(--bg-elevated) 0%, #000 100%);
   padding: 24px 12px;
   display: flex;
   flex-direction: column;
@@ -11,7 +11,7 @@
 .logo h1 {
   font-size: 28px;
   font-weight: bold;
-  color: #1db954;
+  color: var(--accent);
   padding-left: 12px;
 }
 
@@ -26,11 +26,11 @@
   align-items: center;
   gap: 16px;
   padding: 8px 12px;
-  color: #b3b3b3;
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 14px;
   font-weight: 600;
-  border-radius: 4px;
+  border-radius: var(--radius);
   transition: color 0.2s;
 }
 
@@ -43,7 +43,7 @@
 }
 
 .sidebarPlaylists {
-  border-top: 1px solid #282828;
+  border-top: 1px solid var(--surface-2);
   padding-top: 16px;
 }
 
@@ -58,7 +58,7 @@
 .sidebarPlaylists h3 {
   font-size: 12px;
   font-weight: 700;
-  color: #b3b3b3;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin: 0;
@@ -68,7 +68,7 @@
 .createPlaylistBtn {
   background: none;
   border: none;
-  color: #b3b3b3;
+  color: var(--text-muted);
   font-size: 24px;
   font-weight: 300;
   cursor: pointer;
@@ -78,14 +78,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: var(--radius);
   transition:
     background-color 0.2s,
     color 0.2s;
 }
 
 .createPlaylistBtn:hover {
-  background: #1a1a1a;
+  background: var(--surface);
   color: #fff;
 }
 
@@ -107,12 +107,12 @@
 }
 
 .playlistsList::-webkit-scrollbar-thumb {
-  background: #282828;
-  border-radius: 4px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
 }
 
 .playlistsList::-webkit-scrollbar-thumb:hover {
-  background: #3e3e3e;
+  background: var(--border-strong);
 }
 
 .playlistItem {
@@ -120,24 +120,24 @@
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
-  color: #b3b3b3;
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 14px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   transition:
     background-color 0.2s,
     color 0.2s;
 }
 
 .playlistItem:hover {
-  background: #1a1a1a;
+  background: var(--surface);
   color: #fff;
 }
 
 .playlistIcon {
   width: 32px;
   height: 32px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -154,7 +154,7 @@
 
 .playlistCount {
   font-size: 12px;
-  color: #6a6a6a;
+  color: var(--text-subtle);
   flex-shrink: 0;
 }
 
@@ -162,7 +162,7 @@
 .emptyText {
   padding: 8px 12px;
   font-size: 14px;
-  color: #6a6a6a;
+  color: var(--text-subtle);
   font-style: italic;
 }
 

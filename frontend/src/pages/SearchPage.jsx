@@ -13,6 +13,7 @@ import { useLibrary } from '../hooks/useLibrary'
 import { useToast } from '../hooks/useToast'
 import AddToPlaylistModal from '../components/AddToPlaylistModal'
 import Toast from '../components/Toast'
+import { HeartIcon, PlusIcon } from '../components/Icons'
 import styles from './SearchPage.module.css'
 
 const SearchPage = () => {
@@ -312,14 +313,14 @@ const SearchPage = () => {
                                             onClick={() => handleLikeSong(song)}
                                             title={isSongLiked(song._id) ? 'Remove from liked songs' : 'Add to liked songs'}
                                         >
-                                            ♥
+                                            <HeartIcon filled={isSongLiked(song._id)} />
                                         </button>
                                         <button
                                             className={styles.addButton}
                                             onClick={() => { setSelectedSong(song); setIsPlaylistModalOpen(true) }}
                                             title="Add to playlist"
                                         >
-                                            +
+                                            <PlusIcon />
                                         </button>
                                     </div>
                                 )}
@@ -433,14 +434,14 @@ const SearchPage = () => {
                                                             onClick={() => handleLikeSong(song)}
                                                             title={isSongLiked(song._id) ? 'Remove from liked songs' : 'Add to liked songs'}
                                                         >
-                                                            ♥
+                                                            <HeartIcon filled={isSongLiked(song._id)} />
                                                         </button>
                                                         <button
                                                             className={styles.addButton}
                                                             onClick={() => handleAddToPlaylist(song)}
                                                             title="Add to playlist"
                                                         >
-                                                            +
+                                                            <PlusIcon />
                                                         </button>
                                                     </div>
                                                 )}

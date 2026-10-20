@@ -43,6 +43,7 @@ import { useToast } from "../hooks/useToast"
 import AddToPlaylistModal from "../components/AddToPlaylistModal"
 import Toast from "../components/Toast"
 import Skeleton from "../components/Skeleton"
+import { HeartIcon, PlusIcon } from '../components/Icons'
 import styles from "./ArtistPage.module.css"
 
 /**
@@ -271,14 +272,14 @@ const ArtistPage = () => {
                         onClick={(e) => handleLikeSong(song, e)}
                         title={isSongLiked(song._id) ? 'Remove from liked songs' : 'Add to liked songs'}
                       >
-                        ♥
+                        <HeartIcon filled={isSongLiked(song._id)} />
                       </button>
                       <button
                         className={styles.addButton}
                         onClick={() => handleAddToPlaylist(song)}
                         title="Add to playlist"
                       >
-                        +
+                        <PlusIcon />
                       </button>
                     </div>
                   )}

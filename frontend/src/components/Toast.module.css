@@ -3,7 +3,7 @@
     top: 80px;
     right: 24px;
     padding: 12px 20px;
-    border-radius: 8px;
+    border-radius: var(--radius);
     font-size: 14px;
     font-weight: 500;
     z-index: 1000;
@@ -14,12 +14,12 @@
 }
 
 .error {
-    background: #e22134;
+    background: var(--danger);
     color: #fff;
 }
 
 .success {
-    background: #1ed760;
+    background: var(--accent-bright);
     color: #000;
 }
 

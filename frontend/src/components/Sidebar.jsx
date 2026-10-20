@@ -6,6 +6,7 @@ import { useLibrary } from '../hooks/useLibrary'  // ✅ added
 import { createPlaylist } from '../services/playlistService'
 import { getPlaylistGradient } from '../utils/playlistColor'
 import CreatePlaylistModal from './CreatePlaylistModal'
+import { PlusIcon } from './Icons'
 import styles from './Sidebar.module.css'
 
 function Sidebar() {
@@ -62,7 +63,7 @@ function Sidebar() {
                             onClick={() => setIsModalOpen(true)}
                             title="Create playlist"
                         >
-                            +
+                            <PlusIcon size={16} />
                         </button>
                     </div>
                     <div className={styles.playlistsList}>

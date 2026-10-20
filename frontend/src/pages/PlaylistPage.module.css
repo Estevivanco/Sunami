@@ -24,7 +24,7 @@
   width: 232px;
   height: 232px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 8px;
+  border-radius: var(--radius);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,7 +54,7 @@
   margin-top: 16px;
   padding: 8px 24px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: #fff;
   font-size: 14px;
@@ -70,15 +70,15 @@
 }
 
 .followButton.following {
-  background: #1db954;
-  border-color: #1db954;
+  background: var(--accent);
+  border-color: var(--accent);
   color: #fff;
 }
 .playButton {
-  background: #1db954;
+  background: var(--accent);
   color: #fff;
   border: none;
-  border-radius: 24px;
+  border-radius: var(--radius-pill);
   padding: 12px 32px;
   font-size: 16px;
   font-weight: 700;
@@ -92,15 +92,15 @@
 }
 
 .playButton:hover {
-  background: #1ed760;
+  background: var(--accent-bright);
   transform: scale(1.04);
 }
 
 .deleteButton {
   background: transparent;
-  color: #b3b3b3;
-  border: 1px solid #b3b3b3;
-  border-radius: 24px;
+  color: var(--text-muted);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--radius-pill);
   padding: 12px 24px;
   font-size: 14px;
   font-weight: 700;
@@ -122,14 +122,14 @@
 
 .deleteConfirmText {
   font-size: 14px;
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .deleteConfirmBtn {
-  background: #e22134;
+  background: var(--danger);
   color: #fff;
   border: none;
-  border-radius: 24px;
+  border-radius: var(--radius-pill);
   padding: 8px 18px;
   font-size: 14px;
   font-weight: 700;
@@ -143,9 +143,9 @@
 
 .cancelBtn {
   background: transparent;
-  color: #b3b3b3;
-  border: 1px solid #b3b3b3;
-  border-radius: 24px;
+  color: var(--text-muted);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--radius-pill);
   padding: 8px 18px;
   font-size: 14px;
   font-weight: 700;
@@ -161,9 +161,9 @@
 
 /* Collaborators Section */
 .collaborators {
-  background: #181818;
+  background: var(--surface);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 20px 24px;
   margin-bottom: 32px;
   display: flex;
@@ -186,7 +186,7 @@
 
 .collaboratorCount {
   font-size: 13px;
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .collaboratorList {
@@ -204,7 +204,7 @@
   gap: 8px;
   padding: 4px 6px 4px 4px;
   background: rgba(255, 255, 255, 0.07);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 14px;
   color: #fff;
 }
@@ -215,7 +215,7 @@
   height: 28px;
   border-radius: 50%;
   background: rgba(29, 185, 84, 0.2);
-  color: #1ed760;
+  color: var(--accent-bright);
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
@@ -232,7 +232,7 @@
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: #b3b3b3;
+  color: var(--text-muted);
   font-size: 12px;
   line-height: 1;
   cursor: pointer;
@@ -250,7 +250,7 @@
 .collaboratorEmpty {
   margin: 0;
   font-size: 14px;
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .addCollaborator {
@@ -268,7 +268,7 @@
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 10px 16px;
   font-size: 14px;
   color: #fff;
@@ -277,7 +277,7 @@
 }
 
 .searchWrapper input::placeholder {
-  color: #8a8a8a;
+  color: var(--text-subtle);
 }
 
 .searchWrapper input:focus {
@@ -290,8 +290,8 @@
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: #282828;
-  border-radius: 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
   list-style: none;
   margin: 0;
   padding: 6px;
@@ -304,7 +304,7 @@
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-size: 14px;
   color: #fff;
   cursor: pointer;
@@ -318,7 +318,7 @@
 .searchHint {
   padding: 10px;
   font-size: 13px;
-  color: #8a8a8a;
+  color: var(--text-subtle);
 }
 
 /* Songs Table */
@@ -336,10 +336,10 @@
   grid-template-columns: 40px 2fr 1.5fr 1fr 80px 36px;
   gap: 16px;
   padding: 8px 16px;
-  border-bottom: 1px solid #282828;
+  border-bottom: 1px solid var(--surface-2);
   text-transform: uppercase;
   font-size: 12px;
-  color: #b3b3b3;
+  color: var(--text-muted);
   font-weight: 700;
 }
 
@@ -375,7 +375,7 @@
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   transition: background-color 0.2s;
 }
 
@@ -386,7 +386,7 @@
 .songNumber {
   text-align: center;
   font-size: 16px;
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .songInfo {
@@ -408,21 +408,21 @@
 }
 
 .songItem:hover .songTitle {
-  color: #1ed760;
+  color: var(--accent-bright);
 }
 
 .isPlaying .songTitle {
-  color: #1ed760;
+  color: var(--accent-bright);
 }
 
 .songArtist {
   font-size: 14px;
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .songAlbum {
   font-size: 14px;
-  color: #b3b3b3;
+  color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -430,13 +430,13 @@
 
 .songDate {
   font-size: 14px;
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .songDuration {
   text-align: right;
   font-size: 14px;
-  color: #b3b3b3;
+  color: var(--text-muted);
 }
 
 .removeSongBtn {
@@ -445,7 +445,7 @@
   height: 28px;
   background: none;
   border: none;
-  color: #b3b3b3;
+  color: var(--text-muted);
   font-size: 14px;
   cursor: pointer;
   opacity: 0;
@@ -467,7 +467,7 @@
 }
 
 .noContent {
-  color: #b3b3b3;
+  color: var(--text-muted);
   font-size: 16px;
   padding: 32px 0;
   text-align: center;

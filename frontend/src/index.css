@@ -1,4 +1,19 @@
 :root {
+  /* Design tokens */
+  --accent: #1db954;
+  --accent-bright: #1ed760;
+  --bg: #000;
+  --bg-elevated: #121212;
+  --surface: #181818;
+  --surface-2: #282828;
+  --border-strong: #535353;
+  --text: #fff;
+  --text-muted: #b3b3b3;
+  --text-subtle: #8a8a8a;
+  --danger: #e22134;
+  --radius: 8px;
+  --radius-pill: 999px;
+
   font-family:
     "Circular Std",
     system-ui,
@@ -73,7 +88,7 @@ ol {
 
 .equalizerBar {
   width: 3px;
-  background: #1ed760;
+  background: var(--accent-bright);
   border-radius: 1px;
   animation: equalizerBounce 0.8s ease-in-out infinite;
 }
