@@ -60,10 +60,8 @@ All environments (Production, Preview, Development) unless noted.
 | `MONGODB_URI` | `mongodb+srv://...` | Your MongoDB Atlas connection string |
 | `JWT_ACCESS_SECRET` | `<random 64-char string>` | Run `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` to generate |
 | `JWT_REFRESH_SECRET` | `<random 64-char string>` | Must be **different** from the access secret |
-| `PORT` | `3000` | Vercel ignores this but the app requires it to be set |
+| `PORT` | `3000` | Optional — Vercel sets its own port |
 | `FRONTEND_URL` | `https://your-app.netlify.app` | Your frontend's deployed URL — used for CORS |
-| `SPOTIFY_CLIENT_ID` | `...` | From your Spotify Developer Dashboard |
-| `SPOTIFY_CLIENT_SECRET` | `...` | From your Spotify Developer Dashboard |
 | `NODE_ENV` | `production` | Enables `secure` cookies and `sameSite: none` |
 
 ---

@@ -1,397 +1,147 @@
-# 🎵 Music App - Full Stack Projekt
+# Sunami
 
-En modern musikstreaming-applikation byggd med React och Node.js. Komplett med JWT-autentisering, MongoDB-databas, avancerad musikspelare och sökfunktionalitet.
+A full-stack music streaming app inspired by Spotify. Built as a portfolio project to demonstrate modern full-stack development with React and Node.js.
 
----
-
-## 📖 Översikt
-
-Detta är ett fullständigt full stack-projekt som demonstrerar moderna webbutvecklingstekniker:
-
-- **Backend:** REST API med Express.js, MongoDB och JWT-autentisering
-- **Frontend:** React-applikation med Context API, custom hooks och musikspelare
-- **Features:** Autentisering, rollbaserad åtkomst, sök, spellistor och mer
+**Live demo:** *(link your deployed URL here)*
 
 ---
 
-## 🚀 Snabbstart
+## Tech Stack
 
-### 1. Backend (API)
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, React Router 7, Vite, CSS Modules |
+| Backend | Node.js, Express, MongoDB Atlas, Mongoose |
+| Auth | JWT access tokens + httpOnly refresh token cookies |
+| Testing | Vitest, MongoDB Memory Server |
+
+---
+
+## Features
+
+- **Auth** — Register, login, logout with access/refresh token rotation. Refresh tokens stored in httpOnly cookies (XSS-safe). Auto-refresh on 401.
+- **Browse** — Artists, albums, songs, and public playlists. Debounced search across all content types.
+- **Library** — Like songs, save albums, follow artists and playlists. Optimistic UI updates.
+- **Playlists** — Create, edit, delete playlists. Invite collaborators by username. Follow public playlists from other users.
+- **Player** — Persistent bottom player with prev/next queue navigation. Currently-playing indicator on song rows.
+- **Admin** — Role-based access control. Admins can create curated "Sunami Playlists" and manage all content.
+
+---
+
+## Architecture
+
+```
+backend/
+├── controllers/     # Request handling and business logic
+├── repositories/    # Data access layer (Mongoose queries)
+├── models/          # Mongoose schemas
+├── routes/          # Express route definitions
+├── middleware/      # Auth, validation, error handling
+├── utils/           # AppError, catchAsync, token helpers
+└── scripts/         # DB seeding and admin utilities
+
+frontend/src/
+├── pages/           # Route-level components
+├── components/      # Reusable UI components
+├── context/         # Auth, Player, Library (React Context)
+├── hooks/           # useAuth, usePlayer, useLibrary, useToast
+├── services/        # API call wrappers
+├── utils/           # Date, duration, number formatters
+└── constants/       # Route paths, API endpoints
+```
+
+The backend follows a strict layered architecture: routes → controllers → repositories → models. Controllers never touch Mongoose directly — all DB access goes through the repository layer.
+
+---
+
+## Getting Started
+
+### Backend
 
 ```bash
 cd backend
 npm install
 cp .env.example .env
-npm run generate:secrets
-# Konfigurera .env med MongoDB URI och secrets
-npm run seed:admin
-npm run seed
-npm run dev
+# Fill in MONGODB_URI, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET
+npm run generate:secrets   # auto-generates JWT secrets
+npm run seed:admin         # creates an admin user
+npm run seed               # seeds music data from Spotify export
+npm run dev                # starts on http://localhost:3000
 ```
 
-Servern körs på `http://localhost:3000`
-
-📚 **[Läs fullständig Backend-dokumentation →](backend/README.md)**
-
-### 2. Frontend (React App)
+### Frontend
 
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev                # starts on http://localhost:5173
 ```
 
-Appen körs på `http://localhost:5173`
-
-📚 **[Läs fullständig Frontend-dokumentation →](frontend/README.md)**
+Set `VITE_API_URL` in `frontend/.env` if your backend runs on a different port.
 
 ---
 
-## 🏗️ Teknisk Stack
+## Environment Variables
 
-### Backend
-
-- **Runtime:** Node.js 18+ (ES Modules)
-- **Framework:** Express.js
-- **Databas:** MongoDB Atlas (Mongoose)
-- **Auth:** JWT (Access & Refresh Tokens)
-- **Säkerhet:** bcrypt, CORS, Rate Limiting, httpOnly cookies
-- **Validering:** Express-validator
-
-### Frontend
-
-- **Framework:** React 19.2.0
-- **Routing:** React Router DOM 7.13.1
-- **Build:** Vite 7.3.1
-- **Styling:** CSS Modules
-- **State:** Context API
-- **Auth:** JWT med automatisk token refresh
-
----
-
-## ✨ Huvudfunktioner
-
-### 🔐 Autentisering & Säkerhet
-
-- JWT-baserad autentisering med access & refresh tokens
-- Refresh token i httpOnly cookies (XSS-skydd)
-- Automatisk token refresh (transparent för användare)
-- Rollbaserad åtkomstkontroll (user/admin)
-- Bcrypt lösenordshashning
-
-### 🎵 Musikfunktioner
-
-- Sök låtar, artister och album
-- Full-featured musikspelare med play/pause/skip
-- Spellisthantering (skapa, redigera, ta bort)
-- Artist- och albumsidor med detaljerad info
-- Cross-page persistent musikspelare
-
-### 👥 Användarfunktioner
-
-- Registrering och inloggning
-- Användarbibliotek
-- Personliga spellistor
-- Protected routes för autentiserade användare
-
-### 🛠️ Admin-funktioner
-
-- Skapa/uppdatera/ta bort artister
-- Hantera album och låtar
-- Fullständig CRUD-kontroll över musikdata
-
----
-
-## 📁 Projektstruktur
-
-```
-musicapp-project/
-├── backend/              # REST API (Node.js + Express)
-│   ├── config/           # Environment konfiguration
-│   ├── controllers/      # Business logic
-│   ├── models/           # Mongoose schemas
-│   ├── routes/           # API endpoints
-│   ├── middleware/       # Auth, validering, error handling
-│   ├── repositories/     # Data access layer
-│   ├── scripts/          # Seed & utility scripts
-│   ├── utils/            # Helper functions
-│   └── README.md         # Detaljerad backend-dokumentation
-├── frontend/             # React Application
-│   ├── src/
-│   │   ├── components/   # Återanvändbara UI-komponenter
-│   │   ├── pages/        # Route-baserade pages
-│   │   ├── context/      # React Context (Auth, Player, Theme)
-│   │   ├── hooks/        # Custom hooks (useAuth, usePlayer)
-│   │   ├── services/     # API kommunikation
-│   │   ├── constants/    # Routes, API constants
-│   │   └── utils/        # Helper functions
-│   └── README.md         # Detaljerad frontend-dokumentation
-└── README.md             # Denna fil (projektöversikt)
-```
-
----
-
-## 🎯 Avancerade Koncept & Patterns
-
-Detta projekt demonstrerar flera avancerade tekniker:
-
-### Backend
-
-- ✅ **Layered Architecture** (Routes → Controllers → Repositories → Models)
-- ✅ **Repository Pattern** för databasabstraktion
-- ✅ **Middleware Pipeline** för validering och auth
-- ✅ **Custom Error Handling** med centraliserad error handler
-- ✅ **JWT Refresh Token Rotation** för extra säkerhet
-- ✅ **Environment Validation** vid server start
-
-### Frontend
-
-- ✅ **Context API** för global state (Auth, Player, Theme)
-- ✅ **Custom Hooks** för återanvändbar logik
-- ✅ **Protected Routes** med authentication guards
-- ✅ **Service Layer** för API-abstraktion
-- ✅ **Automatic Token Refresh** (transparent för användaren)
-- ✅ **CSS Modules** för scoped styling
-- ✅ **Persistent Audio Player** across page navigation
-
----
-
-## 📚 Detaljerad Dokumentation
-
-För mer information om specifika delar av projektet:
-
-### 📘 [Backend README](backend/README.md)
-
-Innehåller:
-
-- Installation & konfiguration
-- API endpoints (fullständig referens)
-- Autentiseringsflöde
-- Databasschema
-- Scripts & seeding
-- Säkerhetsimplementation
-- Exempel på API-användning
-- Troubleshooting
-
-### 📗 [Frontend README](frontend/README.md)
-
-Innehåller:
-
-- Installation & setup
-- Context API arkitektur
-- Custom hooks (useAuth, usePlayer, useFetch)
-- Routing & navigation
-- Protected routes implementation
-- Component structure
-- State management
-- Best practices
-- Avancerade koncept
-
----
-
-## 🔧 Utvecklingsverktyg
-
-### Backend Development
-
-```bash
-npm run dev              # Starta dev server med nodemon
-npm run seed:admin       # Skapa admin user
-npm run seed             # Seedа musikdata
-npm run generate:secrets # Generera JWT secrets
-```
-
-### Frontend Development
-
-```bash
-npm run dev              # Starta Vite dev server
-npm run build            # Bygga för production
-npm run preview          # Preview production build
-npm run lint             # Kör ESLint
-```
-
----
-
-## 🚦 API Endpoints (Snabbreferens)
-
-**Base URL:** `http://localhost:3000/api`
-
-### Publika Endpoints
-
-```
-GET    /artists          - Hämta alla artister
-GET    /artists/:id      - Hämta specifik artist
-GET    /albums           - Hämta alla album
-GET    /songs            - Hämta alla låtar
-GET    /songs?q=search   - Sök låtar
-POST   /auth/register    - Registrera ny användare
-POST   /auth/login       - Logga in
-```
-
-### Autentiserade Endpoints
-
-```
-GET    /users/me         - Hämta egen profil
-POST   /playlists        - Skapa spellista
-PUT    /playlists/:id    - Uppdatera spellista
-POST   /auth/logout      - Logga ut
-```
-
-### Admin Endpoints
-
-```
-POST   /artists          - Skapa artist
-PUT    /artists/:id      - Uppdatera artist
-DELETE /artists/:id      - Ta bort artist
-POST   /songs            - Skapa låt
-```
-
-**Se [Backend README](backend/README.md) för fullständig API-dokumentation**
-
----
-
-## 🔐 Miljövariabler
-
-### Backend (.env)
+**Backend `.env`:**
 
 ```env
 MONGODB_URI=mongodb+srv://...
-JWT_SECRET=...
+JWT_ACCESS_SECRET=...
 JWT_REFRESH_SECRET=...
+JWT_ACCESS_EXPIRES=15m
+JWT_REFRESH_EXPIRES=7d
 PORT=3000
+NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
 ADMIN_USERNAME=admin
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=...
 ```
 
-### Frontend
+---
 
-API URL konfigureras i `frontend/src/constants/api.js`:
+## API Overview
 
-```javascript
-export const API_BASE_URL = "http://localhost:3000/api";
+**Public**
+```
+POST   /api/auth/register
+POST   /api/auth/login
+POST   /api/auth/refresh
+GET    /api/artists
+GET    /api/albums
+GET    /api/songs?q=query
+GET    /api/playlists/public
+```
+
+**Authenticated**
+```
+GET    /api/users/me/library
+POST   /api/users/me/songs/:id      # like/unlike
+POST   /api/users/me/albums/:id     # save/unsave
+POST   /api/users/me/artists/:id    # follow/unfollow
+POST   /api/playlists
+PUT    /api/playlists/:id
+POST   /api/playlists/:id/songs/:songId
+POST   /api/playlists/:id/follow
+POST   /api/playlists/:id/collaborators
+POST   /api/auth/logout
+```
+
+**Admin only**
+```
+POST   /api/artists
+PUT    /api/artists/:id
+DELETE /api/artists/:id
+POST   /api/songs
+POST   /api/albums
 ```
 
 ---
 
-## 🎓 Lärdomar & Syfte
+## Design Decisions
 
-Detta projekt är byggt för att demonstrera:
-
-1. **Full Stack Development** - Backend och frontend integration
-2. **Modern React** - Context API, hooks, routing
-3. **RESTful API Design** - Proper endpoints och HTTP methods
-4. **Authentication & Authorization** - JWT med refresh tokens
-5. **Database Design** - MongoDB relations och schemas
-6. **Security Best Practices** - Encryption, CORS, validation
-7. **Code Organization** - Layered architecture, separation of concerns
-8. **Developer Experience** - Scripts, documentation, error handling
-
----
-
-## 📦 Databasöversikt
-
-### Collections
-
-- **users** - Användarkonton (username, email, password, role)
-- **artists** - Artister (namn, bio, genres, bild)
-- **albums** - Album (titel, artist, år, cover)
-- **songs** - Låtar (titel, artist, album, duration, audioUrl)
-- **playlists** - Spellistor (namn, användare, låtar)
-
-### Relationer
-
-```
-User → Playlist (1:N)
-Artist → Album (1:N)
-Artist → Song (1:N)
-Album → Song (1:N)
-Playlist → Song (N:M)
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Backend startar inte
-
-- ✅ Kontrollera MongoDB URI i `.env`
-- ✅ Kör `npm run generate:secrets` för JWT secrets
-- ✅ Whitelist IP i MongoDB Atlas
-
-### Frontend får CORS-error
-
-- ✅ Sätt rätt `FRONTEND_URL` i backend `.env`
-- ✅ Kontrollera att backend körs
-
-### Autentisering fungerar inte
-
-- ✅ Kontrollera att JWT secrets är satta
-- ✅ Clear localStorage i browser
-- ✅ Kolla att cookies är aktiverade
-
-**För mer detaljer, se respektive README:**
-
-- [Backend Troubleshooting](backend/README.md#-felsökning)
-- [Frontend Troubleshooting](frontend/README.md#-troubleshooting)
-
----
-
-## 🚀 Deployment Tips
-
-### Backend (t.ex. Render, Railway)
-
-```bash
-npm start
-# Sätt NODE_ENV=production
-# Konfigurera environment variables
-# Sätt domän för FRONTEND_URL
-```
-
-### Frontend (t.ex. Vercel, Netlify)
-
-```bash
-npm run build
-# Uppdatera API_BASE_URL till production backend
-# Deploy från dist/ mappen
-```
-
----
-
-## 📝 TODO / Future Features
-
-Potentiella förbättringar:
-
-- [ ] TypeScript migration
-- [ ] React Query för API state
-- [ ] Admin dashboard (frontend)
-- [ ] Social features (följ artister, dela spellistor)
-- [ ] Audio visualizer
-- [ ] Infinite scroll för låtlistor
-- [ ] PWA support (offline listening)
-- [ ] WebSocket för real-time updates
-- [ ] Unit & integration tests
-- [ ] CI/CD pipeline
-
----
-
-## 📄 Licens
-
-ISC
-
----
-
-## 👨‍💻 Utvecklare
-
-Byggt med ❤️ som ett full stack-projekt för att demonstrera moderna webbutvecklingstekniker.
-
----
-
-## 📖 Kom Igång Nu
-
-1. **Kör Backend:** Se [Backend README](backend/README.md)
-2. **Kör Frontend:** Se [Frontend README](frontend/README.md)
-3. **Testa API:et:** Använd Postman eller frontend:en
-4. **Utforska koden:** Detaljerad dokumentation i respektive README
-
-**Lycka till med kodandet! 🎵**
+- **Refresh token in httpOnly cookie** — The access token (15 min TTL) lives in `localStorage` for simplicity; the refresh token (7 days) is httpOnly to prevent XSS access. On every 401, the frontend automatically retries with a fresh access token before failing.
+- **Repository pattern** — Keeps controllers thin and makes the data layer swappable and independently testable.
+- **Optimistic UI** — Library actions (like, save, follow) update the local React context immediately without waiting for a re-fetch, so the UI feels instant.
+- **No audio hosting** — Songs include a `spotifyUrl` field. The player links out to Spotify rather than self-hosting audio files.
