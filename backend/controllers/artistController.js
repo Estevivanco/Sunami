@@ -4,13 +4,13 @@ import songRepository from '../repositories/songRepository.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/AppError.js';
 
-// Hämta alla artister
+// Get all artists
 const getAllArtists = catchAsync(async (req, res, next) => {
   const artists = await artistRepository.findAll();
   res.json(artists);
 });
 
-// Hämta en specifik artist med ID
+// Get a specific artist by ID
 const getArtistById = catchAsync(async (req, res, next) => {
   const artist = await artistRepository.findById(req.params.id);
   
@@ -21,7 +21,7 @@ const getArtistById = catchAsync(async (req, res, next) => {
   res.json(artist);
 });
 
-// Skapa ny artist
+// Create new artist
 const createArtist = catchAsync(async (req, res, next) => {
   const newArtist = await artistRepository.create({
     name: req.body.name,
@@ -32,7 +32,7 @@ const createArtist = catchAsync(async (req, res, next) => {
   res.status(201).json(newArtist);
 });
 
-// Uppdatera artist
+// Update artist
 const updateArtist = catchAsync(async (req, res, next) => {
   const artist = await artistRepository.update(req.params.id, req.body);
   
@@ -43,7 +43,7 @@ const updateArtist = catchAsync(async (req, res, next) => {
   res.json(artist);
 });
 
-// Radera artist
+// Delete artist
 const deleteArtist = catchAsync(async (req, res, next) => {
   const artist = await artistRepository.delete(req.params.id);
   
@@ -54,18 +54,18 @@ const deleteArtist = catchAsync(async (req, res, next) => {
   res.json({ message: 'Artist deleted successfully' });
 });
 
-// Hämta artists låtar med valfri sökning
+// Get artist's songs with optional search
 const getArtistSongs = catchAsync(async (req, res, next) => {
   const artistId = req.params.id;
-  const searchQuery = req.query.q || ''; // Hämta 'q' query parameter
+  const searchQuery = req.query.q || ''; // Get 'q' query parameter
 
-  // Verifiera att artist finns
+  // Verify artist exists
   const artist = await artistRepository.findById(artistId);
   if (!artist) {
     return next(new AppError('Artist not found', 404));
   }
 
-  // Sök låtar efter artist med valfritt titelfilter
+  // Search songs by artist with optional title filter
   const songs = await songRepository.searchByArtist(artistId, searchQuery);
   
   res.json({
@@ -79,39 +79,39 @@ const getArtistSongs = catchAsync(async (req, res, next) => {
   });
 });
 
-// Hämta alla album av en artist
+// Get all albums by an artist
 const getArtistAlbums = catchAsync(async (req, res, next) => {
   const artistId = req.params.id;
 
-  // Verifiera att artist finns
+  // Verify artist exists
   const artist = await artistRepository.findById(artistId);
   if (!artist) {
     return next(new AppError('Artist not found', 404));
   }
 
-  // Hämta alla album av denna artist
+  // Get all albums by this artist
   const albums = await albumRepository.findByArtist(artistId);
   
   res.json(albums);
 });
 
-// Hämta låtar från ett specifikt album av en specifik artist
+// Get songs from a specific album by a specific artist
 const getArtistAlbumSongs = catchAsync(async (req, res, next) => {
   const { id: artistId, albumId } = req.params;
 
-  // Verifiera att artist finns
+  // Verify artist exists
   const artist = await artistRepository.findById(artistId);
   if (!artist) {
     return next(new AppError('Artist not found', 404));
   }
 
-  // Hämta album och verifiera att det tillhör denna artist
+  // Fetch album and verify it belongs to this artist
   const album = await albumRepository.findById(albumId);
   if (!album) {
     return next(new AppError('Album not found', 404));
   }
 
-  // Verifiera att album tillhör denna artist
+  // Verify album belongs to this artist
   if (album.artist._id.toString() !== artistId) {
     return next(new AppError('Album does not belong to this artist', 400));
   }

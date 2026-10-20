@@ -4,7 +4,6 @@ import AppError from '../utils/AppError.js';
 import Song from '../models/Song.js';
 import Album from '../models/Album.js';
 import Artist from '../models/Artist.js';
-import { followPlaylist } from './playlistController.js';
 
 /**
  * User Management Controller
@@ -21,11 +20,11 @@ const searchUsers = catchAsync(async (req, res, next) => {
   res.json(users);
 });
 
-// Hämta alla användare (endast Admin)
+// Get all users (admin only)
 const getAllUsers = catchAsync(async (req, res, next) => {
   const users = await userRepository.findAll();
   
-  // Filtrera respons: inget lösenord, ingen email i listor
+  // Filter response: no password, no email in list view
   const filteredUsers = users.map(user => ({
     id: user._id,
     username: user.username,
@@ -36,7 +35,7 @@ const getAllUsers = catchAsync(async (req, res, next) => {
   res.json(filteredUsers);
 });
 
-// Hämta användare med ID
+// Get user by ID
 const getUserById = catchAsync(async (req, res, next) => {
   const user = await userRepository.findById(req.params.id);
   
@@ -47,9 +46,9 @@ const getUserById = catchAsync(async (req, res, next) => {
   res.json(user);
 });
 
-// Uppdatera användare
+// Update user
 const updateUser = catchAsync(async (req, res, next) => {
-  // Tillåt inte lösenordsuppdatering via denna endpoint
+  // Do not allow password updates through this endpoint
   const { password, ...updateData } = req.body;
 
   const user = await userRepository.update(req.params.id, updateData);
@@ -61,15 +60,15 @@ const updateUser = catchAsync(async (req, res, next) => {
   res.json(user);
 });
 
-// Radera användare (endast Admin)
+// Delete user (admin only)
 const deleteUser = catchAsync(async (req, res, next) => {
   const user = await userRepository.findById(req.params.id);
-  
+
   if (!user) {
     return next(new AppError('User not found', 404));
   }
 
-  // Förhindra admin från att radera sig själv
+  // Prevent admin from deleting their own account
   if (user._id.toString() === req.userId) {
     return next(new AppError('Cannot delete your own account', 400));
   }
@@ -78,9 +77,9 @@ const deleteUser = catchAsync(async (req, res, next) => {
   res.json({ message: 'User deleted successfully' });
 });
 
-// Hämta aktuell användares profil (skyddad endpoint)
+// Get current user's profile (protected endpoint)
 const getProfile = catchAsync(async (req, res, next) => {
-  // req.userId sätts av authenticateToken middleware
+  // req.userId is set by the authenticateToken middleware
   const user = await userRepository.findById(req.userId);
   
   if (!user) {
@@ -97,20 +96,20 @@ const getProfile = catchAsync(async (req, res, next) => {
   });
 });
 
-// Gör användare till admin (endast Admin)
+// Promote user to admin (admin only)
 const makeAdmin = catchAsync(async (req, res, next) => {
   const user = await userRepository.findById(req.params.id);
-  
+
   if (!user) {
     return next(new AppError('User not found', 404));
   }
 
-  // Kontrollera om användaren redan är admin
+  // Check if user is already an admin
   if (user.role === 'admin') {
     return next(new AppError('User is already an admin', 400));
   }
 
-  // Uppdatera rollen till admin
+  // Update role to admin
   user.role = 'admin';
   await user.save();
 
@@ -126,7 +125,7 @@ const makeAdmin = catchAsync(async (req, res, next) => {
 
 // --- LIBRARY OPERATIONS ---
 
-// Hämta användarens library
+// Get user's library
 const getUserLibrary = catchAsync(async (req, res, next) => {
   const library = await userRepository.getUserLibrary(req.userId);
   
@@ -142,7 +141,7 @@ const getUserLibrary = catchAsync(async (req, res, next) => {
   });
 });
 
-// Like/Unlike en låt
+// Like/Unlike a song
 const toggleLikeSong = catchAsync(async (req, res, next) => {
   const { songId } = req.params;
   
@@ -226,9 +225,9 @@ const toggleFollowArtist = catchAsync(async (req, res, next) => {
   });
 });
 
-// Uppdatera användarprofil
+// Update user profile
 const updateProfile = catchAsync(async (req, res, next) => {
-  // Tillåt endast vissa fält att uppdateras
+  // Only allow certain fields to be updated
   const { username, email } = req.body;
   
   const updateData = {};
@@ -252,7 +251,7 @@ const updateProfile = catchAsync(async (req, res, next) => {
   });
 });
 
-// Radera eget konto
+// Delete own account
 const deleteOwnAccount = catchAsync(async (req, res, next) => {
   const user = await userRepository.findById(req.userId);
   

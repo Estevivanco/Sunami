@@ -2,14 +2,14 @@ import albumRepository from '../repositories/albumRepository.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/AppError.js';
 
-// Hämta alla album (populera artist, men inte hela songs-arrayen)
+// Get all albums (populate artist, but not the full songs array)
 const getAllAlbums = catchAsync(async (req, res, next) => {
-  // Populera endast artist, behåll songs som ID:n för minimal respons
+  // Populate artist only, keep songs as IDs for minimal response
   const albums = await albumRepository.findAll('artist');
   res.json(albums);
 });
 
-// Hämta ett specifikt album med ID
+// Get a specific album by ID
 const getAlbumById = catchAsync(async (req, res, next) => {
   const album = await albumRepository.findById(req.params.id);
   
@@ -20,7 +20,7 @@ const getAlbumById = catchAsync(async (req, res, next) => {
   res.json(album);
 });
 
-// Skapa nytt album
+// Create new album
 const createAlbum = catchAsync(async (req, res, next) => {
   const newAlbum = await albumRepository.create({
     title: req.body.title,
@@ -34,7 +34,7 @@ const createAlbum = catchAsync(async (req, res, next) => {
   res.status(201).json(newAlbum);
 });
 
-// Uppdatera album
+// Update album
 const updateAlbum = catchAsync(async (req, res, next) => {
   const album = await albumRepository.update(req.params.id, req.body);
   
@@ -45,7 +45,7 @@ const updateAlbum = catchAsync(async (req, res, next) => {
   res.json(album);
 });
 
-// Radera album
+// Delete album
 const deleteAlbum = catchAsync(async (req, res, next) => {
   const album = await albumRepository.delete(req.params.id);
   
@@ -56,7 +56,7 @@ const deleteAlbum = catchAsync(async (req, res, next) => {
   res.json({ message: 'Album deleted successfully' });
 });
 
-// Hämta alla låtar i ett album
+// Get all songs in an album
 const getAlbumSongs = catchAsync(async (req, res, next) => {
   const album = await albumRepository.findById(req.params.id);
   

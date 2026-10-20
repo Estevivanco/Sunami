@@ -2,7 +2,7 @@ import Artist from '../models/Artist.js';
 
 class ArtistRepository {
   /**
-   * Hämta alla artister från databasen
+   * Get all artists from the database
    * @returns {Promise<Array>} Array med artistdokument
    */
   async findAll() {
@@ -10,7 +10,7 @@ class ArtistRepository {
   }
 
   /**
-   * Hitta en specifik artist med ID
+   * Find a specific artist by ID
    * @param {string} id - Artist ObjectId
    * @returns {Promise<Object|null>} Artistdokument eller null om inte hittat
    */
@@ -24,7 +24,7 @@ class ArtistRepository {
   }
 
   /**
-   * Hitta artist med exakt namn
+   * Find an artist by exact name
    * @param {string} name - Artistnamn
    * @returns {Promise<Object|null>} Artistdokument eller null
    */
@@ -33,9 +33,9 @@ class ArtistRepository {
   }
 
   /**
-   * Skapa en ny artist
+   * Create a new artist
    * @param {Object} artistData - Artistdata (name, genre, country, image)
-   * @returns {Promise<Object>} Skapat artistdokument
+   * @returns {Promise<Object>} Created artist document
    */
   async create(artistData) {
     const artist = new Artist(artistData);
@@ -43,10 +43,10 @@ class ArtistRepository {
   }
 
   /**
-   * Uppdatera en befintlig artist
+   * Update an existing artist
    * @param {string} id - Artist ObjectId
-   * @param {Object} artistData - Uppdaterade artistfält
-   * @returns {Promise<Object|null>} Uppdaterat artistdokument eller null
+   * @param {Object} artistData - Updated artist fields
+   * @returns {Promise<Object|null>} Updated artist document or null
    */
   async update(id, artistData) {
     return await Artist.findByIdAndUpdate(
@@ -57,16 +57,16 @@ class ArtistRepository {
   }
 
   /**
-   * Radera en artist med ID
+   * Delete an artist by ID
    * @param {string} id - Artist ObjectId
-   * @returns {Promise<Object|null>} Raderat artistdokument eller null
+   * @returns {Promise<Object|null>} Deleted artist document or null
    */
   async delete(id) {
     return await Artist.findByIdAndDelete(id);
   }
 
   /**
-   * Hitta artister efter genre
+   * Find artists by genre
    * @param {string} genre - Genrenamn
    * @returns {Promise<Array>} Array med artister
    */
@@ -75,7 +75,7 @@ class ArtistRepository {
   }
 
   /**
-   * Hitta artister efter land
+   * Find artists by country
    * @param {string} country - Landsnamn
    * @returns {Promise<Array>} Array med artister
    */

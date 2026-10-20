@@ -21,7 +21,7 @@ const playlistSchema = new mongoose.Schema({
   }],
   followers: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Users'
+    ref: 'User'
   }],
   isSystemPlaylist: {
     type: Boolean,
@@ -40,19 +40,19 @@ const playlistSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save hook - Validera att låtar finns och sätt standardnamn
+// Pre-save hook - Validate that songs exist and set default name
 playlistSchema.pre('save', async function(next) {
   try {
-    // Sätt standardnamn om tomt
+    // Set default name if empty
     if (!this.name || this.name.trim() === '') {
       this.name = 'Untitled Playlist';
     }
 
-    // Validera att alla låtar finns
+    // Validate that all songs exist
     if (this.songs && this.songs.length > 0) {
       const validSongs = await Song.find({ _id: { $in: this.songs } });
-      
-      // Ta bort ogiltiga låtreferenser
+
+      // Remove invalid song references
       const validSongIds = validSongs.map(song => song._id.toString());
       this.songs = this.songs.filter(songId => 
         validSongIds.includes(songId.toString())
@@ -67,23 +67,6 @@ playlistSchema.pre('save', async function(next) {
   } catch (error) {
     next(error);
   }
-});
-
-// Post-save hook - Logga när spellista skapas/uppdateras
-playlistSchema.post('save', function(doc) {
-  console.log(`Playlist saved: ${doc.name} (${doc.songs.length} songs)`);
-});
-
-// Pre-remove hook - Logga före radering
-playlistSchema.pre('remove', function(next) {
-  console.log(`Removing playlist: ${this.name}`);
-  next();
-});
-
-// Pre-findOneAndDelete hook
-playlistSchema.pre('findOneAndDelete', function(next) {
-  console.log('Playlist is being deleted');
-  next();
 });
 
 const Playlist = mongoose.model('Playlist', playlistSchema);

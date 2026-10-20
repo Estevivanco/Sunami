@@ -11,84 +11,72 @@ import errorHandler, { notFoundHandler } from './middleware/errorHandler.js';
 const app = express();
 const PORT = config.port;
 
-// Loggnings-middleware
 app.use(morgan(config.nodeEnv === 'development' ? 'dev' : 'combined'));
 
-// CORS middleware
 app.use(cors({
   origin: config.frontendUrl,
   credentials: true
 }));
 
-// Rate limiting middleware
-
-// Relaxed for development: 1000 requests per 15 min
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Max 1000 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false
 });
 app.use('/api/', limiter);
 
-// Striktare rate limit för auth-routes
-// Relaxed for development: 20 auth requests per 15 min
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Max 20 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 20,
   message: 'Too many authentication attempts, please try again later.',
   standardHeaders: true,
   legacyHeaders: false
 });
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
 
-// Applicera auth rate limiter på login- och register-routes
-app.use('/api/login', authLimiter);
-app.use('/api/register', authLimiter);
-
-// Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Cookie parsing middleware
 app.use(cookieParser());
 
-// Routes
 app.use('/', routes);
 
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Welcome to Music App API',
+  res.json({
+    message: 'Welcome to Sunami API',
     version: '1.0.0',
-    endpoints: {
-      health: '/health',
-      api: '/api'
-    }
+    endpoints: { health: '/health', api: '/api' }
   });
 });
 
-// Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
+  res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
 });
 
-// 404 handler - måste vara efter alla routes
 app.use(notFoundHandler);
-
-// Global error handler - måste vara sista middleware
 app.use(errorHandler);
 
-// Starta server-funktion
+// On Vercel (serverless) there is no long-running server: connect lazily per cold start
+if (process.env.VERCEL) {
+  app.use(async (req, res, next) => {
+    try {
+      await connectDB();
+      next();
+    } catch (error) {
+      next(error);
+    }
+  });
+}
+
 const startServer = async () => {
   try {
-    // Anslut till MongoDB
     await connectDB();
-    
-    // Börja lyssna
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
@@ -98,19 +86,18 @@ const startServer = async () => {
   }
 };
 
-// Hantera ohanterade promise rejections
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
   process.exit(1);
 });
 
-// Hantera outhanterade undantag
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
   process.exit(1);
 });
 
-// Initiera server
-startServer();
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 export default app;

@@ -1,4 +1,4 @@
-// Hämta endast publika spellistor (för sök/browse)
+// Get public playlists only (for search/browse)
 const getPublicPlaylists = catchAsync(async (req, res, next) => {
   const playlists = await playlistRepository.findPublic();
   res.json(playlists);
@@ -9,47 +9,41 @@ import AppError from '../utils/AppError.js';
 import userRepository from '../repositories/userRepository.js';
 
 
-// Hämta alla spellistor (endast publika för icke-ägare)
+// Get all playlists (public only for non-owners)
 const getAllPlaylists = catchAsync(async (req, res, next) => {
   let playlists;
   if (req.userId) {
-    // Om inloggad, visa publika + egna privata
+    // If logged in, show public + own private playlists
     playlists = await playlistRepository.findAll();
     playlists = playlists.filter(p => p.isPublic || (p.owner && (p.owner._id || p.owner).toString() === req.userId));
   } else {
-    // Ej inloggad, visa endast publika
+    // Not logged in, show public playlists only
     playlists = await playlistRepository.findAll();
     playlists = playlists.filter(p => p.isPublic);
   }
   res.json(playlists);
 });
 
-// Hämta användarens egna spellistor
+// Get user's own playlists
 const getUserPlaylists = catchAsync(async (req, res, next) => {
   const playlists = await playlistRepository.findByOwner(req.userId);
   res.json(playlists);
 });
 
-// Hämta en specifik spellista med ID
+// Get a specific playlist by ID
 const getPlaylistById = catchAsync(async (req, res, next) => {
   const playlist = await playlistRepository.findById(req.params.id);
   if (!playlist) {
     return next(new AppError('Playlist not found', 404));
   }
-  // Debug logging for private playlist access
-  if (!playlist.isPublic) {
-    console.log('DEBUG: Checking private playlist access');
-    console.log('req.userId:', req.userId);
-    console.log('playlist.owner:', playlist.owner ? playlist.owner.toString() : null);
-  }
-  // Om spellistan är privat, endast ägaren får se
+  // If the playlist is private, only the owner can view it
   if (!playlist.isPublic && (!req.userId || (playlist.owner._id || playlist.owner).toString() !== req.userId)) {
     return next(new AppError('This playlist is private', 403));
   }
   res.json(playlist);
 });
 
-// Skapa ny spellista
+// Create new playlist
 const createPlaylist = catchAsync(async (req, res, next) => {
   const { name, description = null, songs = [], createdBy, isPublic = true } = req.body;
   
@@ -59,59 +53,59 @@ const createPlaylist = catchAsync(async (req, res, next) => {
     songs,
     isPublic,
     owner: req.userId,
-    isSystemPlaylist: req.userRole ==='admin'
+    isSystemPlaylist: req.user?.role === 'admin'
   });
   
   res.status(201).json(newPlaylist);
 });
 
-// Uppdatera spellista
+// Update playlist
 const updatePlaylist = catchAsync(async (req, res, next) => {
-  // Först, hämta spellistan för att verifiera ägarskap
+  // First, fetch the playlist to verify ownership
   const playlist = await playlistRepository.findById(req.params.id);
-  
+
   if (!playlist) {
     return next(new AppError('Playlist not found', 404));
   }
-  
-  // Verifiera ägarskap
+
+  // Verify ownership
   if (!playlist.owner || (playlist.owner._id || playlist.owner).toString() !== req.userId) {
     return next(new AppError('Forbidden: You can only update your own playlists', 403));
   }
-  
-  // Förhindra ägarmanipulering - ta bort owner från uppdateringsdata
+
+  // Prevent owner manipulation - remove owner from update data
   const { owner, ...updateData } = req.body;
-  
-  // Uppdatera spellistan
+
+  // Update the playlist
   const updatedPlaylist = await playlistRepository.update(req.params.id, updateData);
   res.json(updatedPlaylist);
 });
 
-// Radera spellista
+// Delete playlist
 const deletePlaylist = catchAsync(async (req, res, next) => {
-  // Först, hämta spellistan för att verifiera ägarskap INNAN radering
+  // First, fetch the playlist to verify ownership BEFORE deleting
   const playlist = await playlistRepository.findById(req.params.id);
-  
+
   if (!playlist) {
     return next(new AppError('Playlist not found', 404));
   }
-  
-  // Verifiera ägarskap
+
+  // Verify ownership
   if (!playlist.owner || (playlist.owner._id || playlist.owner).toString() !== req.userId) {
     return next(new AppError('Forbidden: You can only delete your own playlists', 403));
   }
-  
-  // Nu radera spellistan
+
+  // Now delete the playlist
   await playlistRepository.delete(req.params.id);
   res.json({ message: 'Playlist deleted successfully' });
 });
 
-// Lägg till låt i spellista
+// Add song to playlist
 const addSongToPlaylist = catchAsync(async (req, res, next) => {
   const { id: playlistId } = req.params;
   const { songId } = req.body;
 
-  // Hämta spellistan för att verifiera ägarskap
+  // Fetch the playlist to verify ownership
   const playlist = await playlistRepository.findById(playlistId);
   
   if (!playlist) {
@@ -125,7 +119,7 @@ const addSongToPlaylist = catchAsync(async (req, res, next) => {
     return next(new AppError('Forbidden: Sunami playlists cannot be modified', 403));
   }
 
-  //Verifiera ägandeskap
+  // Verify ownership
   const isOwner = (playlist.owner._id || playlist.owner).toString() === req.userId
   const isCollaborator = playlist.collaborators.some((id) => id.toString() === req.userId)
 
@@ -137,11 +131,11 @@ const addSongToPlaylist = catchAsync(async (req, res, next) => {
   res.json(updatedPlaylist);
 });
 
-// Ta bort låt från spellista
+// Remove song from playlist
 const removeSongFromPlaylist = catchAsync(async (req, res, next) => {
   const { id: playlistId, songId } = req.params;
 
-  // Hämta spellistan för att verifiera ägarskap
+  // Fetch the playlist to verify ownership
   const playlist = await playlistRepository.findById(playlistId);
   
   if (!playlist) {
@@ -156,7 +150,7 @@ const removeSongFromPlaylist = catchAsync(async (req, res, next) => {
     return next(new AppError('Forbidden: Sunami playlists cannot be modified', 403));
   }
 
-  // Verifiera ägarskap
+  // Verify ownership
   const isOwner = (playlist.owner._id || playlist.owner).toString() === req.userId
   const isCollaborator = playlist.collaborators.some((id) => id.toString() === req.userId)
 
@@ -164,7 +158,7 @@ const removeSongFromPlaylist = catchAsync(async (req, res, next) => {
     return next(new AppError('Forbidden: You do not have permission to modify this playlist', 403));
   }
 
-  // Ta bort låten från spellistan
+  // Remove the song from the playlist
   const updatedPlaylist = await playlistRepository.removeSongFromPlaylist(playlistId, songId);
   res.json(updatedPlaylist);
 });

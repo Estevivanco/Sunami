@@ -2,14 +2,14 @@ import Album from '../models/Album.js';
 
 class AlbumRepository {
   /**
-   * Hämta alla album från databasen
-   * @param {string|boolean} populate - 'artist' för att endast populera artist, true för allt, false för inget
+   * Get all albums from the database
+   * @param {string|boolean} populate - 'artist' to populate only the artist, true for everything, false for nothing
    * @returns {Promise<Array>} Array med albumdokument
    */
   async findAll(populate = true) {
     const query = Album.find();
     if (populate === 'artist') {
-      return await query.populate('artist'); // Populera endast artist, behåll songs som ID:n
+      return await query.populate('artist'); // Populate only the artist, keep songs as IDs
     } else if (populate === true) {
       return await query.populate('artist').populate('songs'); // Populera allt
     }
@@ -17,7 +17,7 @@ class AlbumRepository {
   }
 
   /**
-   * Hitta ett specifikt album med dess ID
+   * Find a specific album by its ID
    * @param {string} id - Album ObjectId
    * @param {boolean} populate - Om artist- och songs-referenser ska populeras
    * @returns {Promise<Object|null>} Albumdokument eller null om inte hittat
@@ -39,9 +39,9 @@ class AlbumRepository {
   }
 
   /**
-   * Skapa ett nytt album
+   * Create a new album
    * @param {Object} albumData - Albumdata (title, artist, releaseYear, genre, etc.)
-   * @returns {Promise<Object>} Skapat albumdokument
+   * @returns {Promise<Object>} Created album document
    */
   async create(albumData) {
     const album = new Album(albumData);
@@ -49,10 +49,10 @@ class AlbumRepository {
   }
 
   /**
-   * Uppdatera ett befintligt album
+   * Update an existing album
    * @param {string} id - Album ObjectId
-   * @param {Object} albumData - Uppdaterade albumfält
-   * @returns {Promise<Object|null>} Uppdaterat albumdokument eller null
+   * @param {Object} albumData - Updated album fields
+   * @returns {Promise<Object|null>} Updated album document or null
    */
   async update(id, albumData) {
     return await Album.findByIdAndUpdate(
@@ -63,16 +63,16 @@ class AlbumRepository {
   }
 
   /**
-   * Radera ett album med ID
+   * Delete an album by ID
    * @param {string} id - Album ObjectId
-   * @returns {Promise<Object|null>} Raderat albumdokument eller null
+   * @returns {Promise<Object|null>} Deleted album document or null
    */
   async delete(id) {
     return await Album.findByIdAndDelete(id);
   }
 
   /**
-   * Hitta alla album av en specifik artist
+   * Find all albums by a specific artist
    * @param {string} artistId - Artist ObjectId
    * @returns {Promise<Array>} Array med album med populerad artist och songs
    */
@@ -81,7 +81,7 @@ class AlbumRepository {
   }
 
   /**
-   * Hitta album efter genre
+   * Find albums by genre
    * @param {string} genre - Genrenamn
    * @returns {Promise<Array>} Array med album med populerad artist
    */
@@ -90,7 +90,7 @@ class AlbumRepository {
   }
 
   /**
-   * Räkna totalt antal album per artist
+   * Count total albums per artist
    * @param {string} artistId - Artist ObjectId
    * @returns {Promise<number>} Antal album
    */

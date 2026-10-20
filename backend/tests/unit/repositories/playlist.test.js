@@ -22,8 +22,8 @@ describe('Playlist Repository', () => {
   describe('findAll', () => {
     it('should return all playlists', async () => {
       await Playlist.create([
-        { name: 'Playlist 1', songs: [song1._id] },
-        { name: 'Playlist 2', songs: [song2._id] }
+        { owner: user._id, name: 'Playlist 1', songs: [song1._id] },
+        { owner: user._id, name: 'Playlist 2', songs: [song2._id] }
       ]);
 
       const playlists = await playlistRepository.findAll();
@@ -37,7 +37,7 @@ describe('Playlist Repository', () => {
 
     it('should populate songs by default', async () => {
       await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -47,7 +47,7 @@ describe('Playlist Repository', () => {
 
     it('should not populate when populate is false', async () => {
       await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -59,7 +59,7 @@ describe('Playlist Repository', () => {
   describe('findById', () => {
     it('should find playlist by ID', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id, song2._id]
       });
 
@@ -76,7 +76,7 @@ describe('Playlist Repository', () => {
 
     it('should populate songs with artist and album', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -88,7 +88,7 @@ describe('Playlist Repository', () => {
 
     it('should not populate when populate is false', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -103,7 +103,7 @@ describe('Playlist Repository', () => {
         name: 'New Playlist',
         description: 'Test description',
         songs: [song1._id, song2._id],
-        createdBy: 'TestUser'
+        owner: user._id
       };
 
       const playlist = await playlistRepository.create(playlistData);
@@ -138,17 +138,17 @@ describe('Playlist Repository', () => {
   describe('update', () => {
     it('should update playlist name', async () => {
       const playlist = await Playlist.create({
-        name: 'Old Name',
+        owner: user._id, name: 'Old Name',
         songs: [song1._id]
       });
 
-      const updated = await playlistRepository.update(playlist._id, { name: 'New Name' });
+      const updated = await playlistRepository.update(playlist._id, { owner: user._id, name: 'New Name' });
       expect(updated.name).toBe('New Name');
     });
 
     it('should update playlist description', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist'
+        owner: user._id, name: 'Test Playlist'
       });
 
       const updated = await playlistRepository.update(playlist._id, {
@@ -159,7 +159,7 @@ describe('Playlist Repository', () => {
 
     it('should update isPublic status', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         isPublic: true
       });
 
@@ -169,7 +169,7 @@ describe('Playlist Repository', () => {
 
     it('should return null for non-existent playlist', async () => {
       const fakeId = '507f1f77bcf86cd799439011';
-      const updated = await playlistRepository.update(fakeId, { name: 'New Name' });
+      const updated = await playlistRepository.update(fakeId, { owner: user._id, name: 'New Name' });
       expect(updated).toBeNull();
     });
   });
@@ -177,7 +177,7 @@ describe('Playlist Repository', () => {
   describe('delete', () => {
     it('should delete a playlist', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -195,42 +195,12 @@ describe('Playlist Repository', () => {
     });
   });
 
-  describe('findByCreator', () => {
-    it('should find playlists by creator', async () => {
-      await Playlist.create([
-        { name: 'Playlist 1', createdBy: 'TestUser', songs: [song1._id] },
-        { name: 'Playlist 2', createdBy: 'TestUser', songs: [song2._id] },
-        { name: 'Playlist 3', createdBy: 'OtherUser', songs: [song1._id] }
-      ]);
-
-      const playlists = await playlistRepository.findByCreator('TestUser');
-      expect(playlists).toHaveLength(2);
-      expect(playlists[0].createdBy).toBe('TestUser');
-    });
-
-    it('should return empty array when creator has no playlists', async () => {
-      const playlists = await playlistRepository.findByCreator('NonExistentUser');
-      expect(playlists).toEqual([]);
-    });
-
-    it('should populate songs', async () => {
-      await Playlist.create({
-        name: 'Test Playlist',
-        createdBy: 'TestUser',
-        songs: [song1._id]
-      });
-
-      const playlists = await playlistRepository.findByCreator('TestUser');
-      expect(playlists[0].songs[0].title).toBe('Song 1');
-    });
-  });
-
   describe('findPublic', () => {
     it('should find all public playlists', async () => {
       await Playlist.create([
-        { name: 'Public 1', isPublic: true, songs: [song1._id] },
-        { name: 'Private 1', isPublic: false, songs: [song2._id] },
-        { name: 'Public 2', isPublic: true, songs: [song1._id] }
+        { owner: user._id, name: 'Public 1', isPublic: true, songs: [song1._id] },
+        { owner: user._id, name: 'Private 1', isPublic: false, songs: [song2._id] },
+        { owner: user._id, name: 'Public 2', isPublic: true, songs: [song1._id] }
       ]);
 
       const playlists = await playlistRepository.findPublic();
@@ -240,7 +210,7 @@ describe('Playlist Repository', () => {
 
     it('should return empty array when no public playlists exist', async () => {
       await Playlist.create({
-        name: 'Private Playlist',
+        owner: user._id, name: 'Private Playlist',
         isPublic: false
       });
 
@@ -250,7 +220,7 @@ describe('Playlist Repository', () => {
 
     it('should populate songs', async () => {
       await Playlist.create({
-        name: 'Public Playlist',
+        owner: user._id, name: 'Public Playlist',
         isPublic: true,
         songs: [song1._id]
       });
@@ -269,7 +239,7 @@ describe('Playlist Repository', () => {
 
       const playlists = await playlistRepository.findByOwner(user._id);
       expect(playlists).toHaveLength(2);
-      expect(playlists[0].owner.toString()).toBe(user._id.toString());
+      expect(playlists[0].owner._id.toString()).toBe(user._id.toString());
     });
 
     it('should sort by createdAt descending', async () => {
@@ -306,7 +276,7 @@ describe('Playlist Repository', () => {
   describe('addSongToPlaylist', () => {
     it('should add song to playlist', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -317,7 +287,7 @@ describe('Playlist Repository', () => {
 
     it('should prevent duplicate songs', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -333,7 +303,7 @@ describe('Playlist Repository', () => {
 
     it('should populate songs', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: []
       });
 
@@ -345,7 +315,7 @@ describe('Playlist Repository', () => {
   describe('removeSongFromPlaylist', () => {
     it('should remove song from playlist', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id, song2._id]
       });
 
@@ -356,7 +326,7 @@ describe('Playlist Repository', () => {
 
     it('should handle removing non-existent song', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -373,7 +343,7 @@ describe('Playlist Repository', () => {
 
     it('should populate remaining songs', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id, song2._id]
       });
 

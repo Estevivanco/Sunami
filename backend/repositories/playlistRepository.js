@@ -2,9 +2,9 @@ import Playlist from '../models/Playlist.js';
 
 class PlaylistRepository {
   /**
-   * Hämta alla spellistor från databasen
-   * @param {boolean} populate - Om songs-referenser ska populeras
-   * @returns {Promise<Array>} Array med spellistdokument
+   * Get all playlists from the database
+   * @param {boolean} populate - Whether to populate song references
+   * @returns {Promise<Array>} Array of playlist documents
    */
   async findAll(populate = true) {
     const query = Playlist.find();
@@ -17,10 +17,10 @@ class PlaylistRepository {
   }
 
   /**
-   * Hitta en specifik spellista med ID
+   * Find a specific playlist by ID
    * @param {string} id - Playlist ObjectId
-   * @param {boolean} populate - Om songs-referenser ska populeras
-   * @returns {Promise<Object|null>} Spellistdokument eller null om inte hittat
+   * @param {boolean} populate - Whether to populate song references
+   * @returns {Promise<Object|null>} Playlist document or null if not found
    */
   async findById(id, populate = true) {
     const query = Playlist.findById(id);
@@ -39,9 +39,9 @@ class PlaylistRepository {
   }
 
   /**
-   * Skapa en ny spellista
-   * @param {Object} playlistData - Spellistdata (name, description, createdBy, songs, etc.)
-   * @returns {Promise<Object>} Skapat spellistdokument
+   * Create a new playlist
+   * @param {Object} playlistData - Playlist data (name, description, createdBy, songs, etc.)
+   * @returns {Promise<Object>} Created playlist document
    */
   async create(playlistData) {
     const playlist = new Playlist(playlistData);
@@ -49,10 +49,10 @@ class PlaylistRepository {
   }
 
   /**
-   * Uppdatera en befintlig spellista
+   * Update an existing playlist
    * @param {string} id - Playlist ObjectId
-   * @param {Object} playlistData - Uppdaterade spellistfält
-   * @returns {Promise<Object|null>} Uppdaterat spellistdokument eller null
+   * @param {Object} playlistData - Updated playlist fields
+   * @returns {Promise<Object|null>} Updated playlist document or null
    */
   async update(id, playlistData) {
     return await Playlist.findByIdAndUpdate(
@@ -63,28 +63,17 @@ class PlaylistRepository {
   }
 
   /**
-   * Radera en spellista med ID
+   * Delete a playlist by ID
    * @param {string} id - Playlist ObjectId
-   * @returns {Promise<Object|null>} Raderat spellistdokument eller null
+   * @returns {Promise<Object|null>} Deleted playlist document or null
    */
   async delete(id) {
     return await Playlist.findByIdAndDelete(id);
   }
 
   /**
-   * Hitta alla spellistor skapade av en specifik användare
-   * @param {string} createdBy - User ID (skapare)
-   * @returns {Promise<Array>} Array med spellistor med populerade songs
-   */
-  async findByCreator(createdBy) {
-    return await Playlist.find({ createdBy })
-      .populate('songs')
-      .populate({ path: 'owner', select: 'username' });
-  }
-
-  /**
-   * Hitta alla publika spellistor
-   * @returns {Promise<Array>} Array med publika spellistor med populerade songs
+   * Find all public playlists
+   * @returns {Promise<Array>} Array of public playlists with populated songs
    */
   async findPublic() {
     return await Playlist.find({ isPublic: true })
@@ -93,9 +82,9 @@ class PlaylistRepository {
   }
 
   /**
-   * Hitta alla spellistor ägda av en specifik användare
+   * Find all playlists owned by a specific user
    * @param {string} userId - User ObjectId (owner)
-   * @returns {Promise<Array>} Array med spellistor med populerade songs
+   * @returns {Promise<Array>} Array of playlists with populated songs
    */
   async findByOwner(userId) {
     return await Playlist.find({ owner: userId })
@@ -105,10 +94,10 @@ class PlaylistRepository {
   }
 
   /**
-   * Lägg till en låt i en spellista (förhindrar dubbletter)
+   * Add a song to a playlist (prevents duplicates)
    * @param {string} playlistId - Playlist ObjectId
    * @param {string} songId - Song ObjectId
-   * @returns {Promise<Object|null>} Uppdaterad spellista med populerade songs
+   * @returns {Promise<Object|null>} Updated playlist with populated songs
    */
   async addSongToPlaylist(playlistId, songId) {
     return await Playlist.findByIdAndUpdate(
@@ -119,10 +108,10 @@ class PlaylistRepository {
   }
 
   /**
-   * Ta bort en låt från en spellista
+   * Remove a song from a playlist
    * @param {string} playlistId - Playlist ObjectId
    * @param {string} songId - Song ObjectId
-   * @returns {Promise<Object|null>} Uppdaterad spellista med populerade songs
+   * @returns {Promise<Object|null>} Updated playlist with populated songs
    */
   async removeSongFromPlaylist(playlistId, songId) {
     return await Playlist.findByIdAndUpdate(
@@ -133,10 +122,10 @@ class PlaylistRepository {
   }
 
   /**
- * Lägg till följare på en spellista
+ * Add a follower to a playlist
  * @param {string} playlistId - Playlist ObjectId
  * @param {string} userId - User ObjectId
- * @returns {Promise<Object>} Uppdaterad spellista
+ * @returns {Promise<Object>} Updated playlist
  */
 async addFollower(playlistId, userId) {
   return await Playlist.findByIdAndUpdate(
@@ -147,10 +136,10 @@ async addFollower(playlistId, userId) {
 }
 
 /**
- * Ta bort följare från en spellista
+ * Remove a follower from a playlist
  * @param {string} playlistId - Playlist ObjectId
  * @param {string} userId - User ObjectId
- * @returns {Promise<Object>} Uppdaterad spellista
+ * @returns {Promise<Object>} Updated playlist
  */
 async removeFollower(playlistId, userId) {
   return await Playlist.findByIdAndUpdate(

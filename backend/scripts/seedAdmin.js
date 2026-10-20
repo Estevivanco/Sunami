@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import crypto from 'crypto';
 import User from '../models/User.js';
 
-// Ladda miljövariabler
+// Load environment variables
 dotenv.config();
 
 /**
@@ -24,12 +24,12 @@ const seedAdmin = async () => {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    // Hämta admin-referenser från miljövariabler
+    // Get admin credentials from environment variables
     const adminUsername = process.env.ADMIN_USERNAME;
     const adminEmail = process.env.ADMIN_EMAIL;
     let adminPassword = process.env.ADMIN_PASSWORD;
 
-    // Validera miljövariabler
+    // Validate environment variables
     if (!adminUsername || !adminEmail) {
       console.error('Error: Missing admin credentials in .env file');
       console.error('Required: ADMIN_USERNAME, ADMIN_EMAIL');
@@ -37,7 +37,7 @@ const seedAdmin = async () => {
       process.exit(1);
     }
 
-    // Generera säkert lösenord om det inte är angivet
+    // Generate a secure password if none is provided
     if (!adminPassword) {
       adminPassword = generateSecurePassword();
       console.log('⚠️  No ADMIN_PASSWORD in .env - generated secure password:');
@@ -45,7 +45,7 @@ const seedAdmin = async () => {
       console.log('⚠️  Save this password! Add to .env: ADMIN_PASSWORD=${adminPassword}\n');
     }
 
-    // Kontrollera om admin redan existerar
+    // Check whether the admin already exists
     const existingAdmin = await User.findOne({
       $or: [
         { email: adminEmail.toLowerCase() },
@@ -59,7 +59,7 @@ const seedAdmin = async () => {
       console.log(`  Email: ${existingAdmin.email}`);
       console.log(`  Role: ${existingAdmin.role}`);
       
-      // Uppdatera till admin om inte redan
+      // Promote to admin if not already
       if (existingAdmin.role !== 'admin') {
         existingAdmin.role = 'admin';
         await existingAdmin.save();
@@ -68,7 +68,7 @@ const seedAdmin = async () => {
         console.log('ℹ️  User already has admin role');
       }
     } else {
-      // Skapa ny admin-användare
+      // Create new admin user
       const admin = new User({
         username: adminUsername,
         email: adminEmail,
@@ -83,7 +83,7 @@ const seedAdmin = async () => {
       console.log(`  Role: ${admin.role}`);
     }
 
-    // Koppla från MongoDB
+    // Disconnect from MongoDB
     await mongoose.disconnect();
     console.log('\nDisconnected from MongoDB');
     process.exit(0);

@@ -2,10 +2,10 @@ import { config } from '../config/env.js';
 
 /**
  * Global Error Handler Middleware
- * Hanterar alla fel i applikationen med detaljerad loggning och svar
+ * Handles all errors in the application with detailed logging and responses
  */
 
-// Hantera specifika feltyper
+// Handle specific error types
 const handleCastError = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return { message, statusCode: 400 };
@@ -39,7 +39,7 @@ const handleMulterError = (err) => {
   return { message: `File upload error: ${err.message}`, statusCode: 400 };
 };
 
-// Skicka felsvar i development-läge
+// Send error response in development mode
 const sendErrorDev = (err, req, res) => {
   console.error('🔴 ERROR DETAILS:', {
     message: err.message,
@@ -58,9 +58,9 @@ const sendErrorDev = (err, req, res) => {
   });
 };
 
-// Skicka felsvar i production-läge (mindre detaljer)
+// Send error response in production mode (fewer details)
 const sendErrorProd = (err, req, res) => {
-  // Operativt, tillförlitligt fel: skicka meddelande till klient
+  // Operational, trusted error: send message to client
   if (err.isOperational) {
     res.status(err.statusCode).json({
       status: err.status,
@@ -69,7 +69,7 @@ const sendErrorProd = (err, req, res) => {
       timestamp: new Date().toISOString()
     });
   } 
-  // Programmeringsfel eller okänt fel: läck inte feldetaljer
+  // Programming or unknown error: don't leak error details
   else {
     console.error('🔴 ERROR:', err);
     
@@ -82,17 +82,17 @@ const sendErrorProd = (err, req, res) => {
   }
 };
 
-// Huvudsaklig error handler middleware
+// Main error handler middleware
 const errorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
-  // Hantera specifika feltyper
+  // Handle specific error types
   let error = { ...err };
   error.message = err.message;
   error.name = err.name;
 
-  // MongoDB CastError (ogiltigt ObjectId)
+  // MongoDB CastError (invalid ObjectId)
   if (err.name === 'CastError') {
     const handled = handleCastError(err);
     error.message = handled.message;
@@ -147,7 +147,7 @@ const errorHandler = (err, req, res, next) => {
     error.isOperational = true;
   }
 
-  // Skicka svar baserat på miljö
+  // Send response based on environment
   if (config.nodeEnv === 'development') {
     sendErrorDev(error, req, res);
   } else {

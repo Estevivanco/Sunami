@@ -24,7 +24,7 @@ describe('Playlist Model', () => {
         name: 'Test Playlist',
         description: 'A test playlist',
         songs: [song1._id, song2._id],
-        createdBy: 'TestUser'
+        owner: user._id
       };
 
       const playlist = await Playlist.create(playlistData);
@@ -32,7 +32,6 @@ describe('Playlist Model', () => {
       expect(playlist.name).toBe('Test Playlist');
       expect(playlist.description).toBe('A test playlist');
       expect(playlist.songs).toHaveLength(2);
-      expect(playlist.createdBy).toBe('TestUser');
     });
 
     it('should require name', async () => {
@@ -45,7 +44,7 @@ describe('Playlist Model', () => {
 
     it('should trim name', async () => {
       const playlistData = {
-        name: '  Test Playlist  ',
+        owner: user._id, name: '  Test Playlist  ',
         songs: [song1._id]
       };
 
@@ -55,7 +54,7 @@ describe('Playlist Model', () => {
 
     it('should trim description', async () => {
       const playlistData = {
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         description: '  Test description  '
       };
 
@@ -67,7 +66,7 @@ describe('Playlist Model', () => {
       const fakeSongId = '507f1f77bcf86cd799439011';
       
       const playlistData = {
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id, fakeSongId, song2._id]
       };
 
@@ -83,7 +82,7 @@ describe('Playlist Model', () => {
   describe('Default values', () => {
     it('should default songs to empty array', async () => {
       const playlist = await Playlist.create({
-        name: 'Empty Playlist'
+        owner: user._id, name: 'Empty Playlist'
       });
 
       expect(playlist.songs).toEqual([]);
@@ -91,23 +90,19 @@ describe('Playlist Model', () => {
 
     it('should default isPublic to true', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist'
+        owner: user._id, name: 'Test Playlist'
       });
 
       expect(playlist.isPublic).toBe(true);
     });
 
-    it('should default owner to null', async () => {
-      const playlist = await Playlist.create({
-        name: 'Test Playlist'
-      });
-
-      expect(playlist.owner).toBeNull();
+    it('should require an owner', async () => {
+      await expect(Playlist.create({ name: 'Test Playlist' })).rejects.toThrow(/owner/);
     });
 
     it('should accept isPublic false', async () => {
       const playlist = await Playlist.create({
-        name: 'Private Playlist',
+        owner: user._id, name: 'Private Playlist',
         isPublic: false
       });
 
@@ -127,7 +122,7 @@ describe('Playlist Model', () => {
   describe('Timestamps', () => {
     it('should add createdAt timestamp', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist'
+        owner: user._id, name: 'Test Playlist'
       });
 
       expect(playlist.createdAt).toBeInstanceOf(Date);
@@ -135,7 +130,7 @@ describe('Playlist Model', () => {
 
     it('should add updatedAt timestamp', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist'
+        owner: user._id, name: 'Test Playlist'
       });
 
       expect(playlist.updatedAt).toBeInstanceOf(Date);
@@ -145,43 +140,26 @@ describe('Playlist Model', () => {
   describe('Optional fields', () => {
     it('should accept description', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         description: 'A collection of great songs'
       });
 
       expect(playlist.description).toBe('A collection of great songs');
     });
 
-    it('should accept createdBy', async () => {
-      const playlist = await Playlist.create({
-        name: 'Test Playlist',
-        createdBy: 'Admin'
-      });
-
-      expect(playlist.createdBy).toBe('Admin');
-    });
-
     it('should work without description', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist'
+        owner: user._id, name: 'Test Playlist'
       });
 
       expect(playlist.description).toBeUndefined();
-    });
-
-    it('should work without createdBy', async () => {
-      const playlist = await Playlist.create({
-        name: 'Test Playlist'
-      });
-
-      expect(playlist.createdBy).toBeUndefined();
     });
   });
 
   describe('Song references', () => {
     it('should accept multiple songs', async () => {
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id, song2._id]
       });
 
@@ -192,7 +170,7 @@ describe('Playlist Model', () => {
 
     it('should handle empty songs array', async () => {
       const playlist = await Playlist.create({
-        name: 'Empty Playlist',
+        owner: user._id, name: 'Empty Playlist',
         songs: []
       });
 
@@ -204,7 +182,7 @@ describe('Playlist Model', () => {
       const invalidSong = '507f1f77bcf86cd799439011';
 
       const playlist = await Playlist.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [validSong, invalidSong]
       });
 
@@ -217,7 +195,7 @@ describe('Playlist Model', () => {
   describe('Playlist name edge cases', () => {
     it('should handle special characters in name', async () => {
       const playlist = await Playlist.create({
-        name: 'My Awesome Playlist! 🎵'
+        owner: user._id, name: 'My Awesome Playlist! 🎵'
       });
 
       expect(playlist.name).toBe('My Awesome Playlist! 🎵');
@@ -226,7 +204,7 @@ describe('Playlist Model', () => {
     it('should handle long names', async () => {
       const longName = 'A'.repeat(200);
       const playlist = await Playlist.create({
-        name: longName
+        owner: user._id, name: longName
       });
 
       expect(playlist.name).toBe(longName);

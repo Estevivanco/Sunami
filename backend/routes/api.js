@@ -8,7 +8,7 @@ import userRoutes from './userRoutes.js';
 
 const router = express.Router();
 
-// Använd routes
+// Mount routes
 router.use('/api', authRoutes);      // Authentication routes (public)
 router.use('/api', userRoutes);      // User management routes (protected)
 router.use('/api', songRoutes);

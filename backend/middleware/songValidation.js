@@ -1,7 +1,7 @@
 import { body } from 'express-validator';
 import { handleValidationErrors } from './userValidation.js';
 
-// Låt-valideringsregler
+// Song validation rules
 export const validateSong = [
   body('title')
     .trim()

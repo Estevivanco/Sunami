@@ -1,6 +1,6 @@
 import { body, validationResult } from 'express-validator';
 
-// Middleware för att kontrollera valideringsresultat
+// Middleware to check validation results
 export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -14,7 +14,7 @@ export const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Användar-valideringsregler
+// User validation rules
 export const validateRegister = [
   body('username')
     .trim()

@@ -2,35 +2,35 @@ import User from '../models/User.js';
 
 class UserRepository {
   /**
-   * Hämta alla användare från databasen (lösenord exkluderat som standard)
-   * @returns {Promise<Array>} Array med användardokument
+   * Get all users from the database (password excluded by default)
+   * @returns {Promise<Array>} Array of user documents
    */
   async findAll() {
     return await User.find();
   }
 
   /**
-   * Hitta en specifik användare med ID (lösenord exkluderat)
+   * Find a specific user by ID (password excluded)
    * @param {string} id - User ObjectId
-   * @returns {Promise<Object|null>} Användardokument eller null om inte hittat
+   * @returns {Promise<Object|null>} User document or null if not found
    */
   async findById(id) {
     return await User.findById(id);
   }
 
   /**
-   * Hitta användare med email (lösenord exkluderat)
-   * @param {string} email - Användarens email (skiftlägesokänslig)
-   * @returns {Promise<Object|null>} Användardokument eller null
+   * Find user by email (password excluded)
+   * @param {string} email - User's email (case-insensitive)
+   * @returns {Promise<Object|null>} User document or null
    */
   async findByEmail(email) {
     return await User.findOne({ email: email.toLowerCase() });
   }
 
   /**
-   * Hitta användare med användarnamn (lösenord exkluderat)
-   * @param {string} username - Användarnamn
-   * @returns {Promise<Object|null>} Användardokument eller null
+   * Find user by username (password excluded)
+   * @param {string} username - Username
+   * @returns {Promise<Object|null>} User document or null
    */
   async findByUsername(username) {
     return await User.findOne({ username });
@@ -44,27 +44,27 @@ class UserRepository {
   }
 
   /**
-   * Hitta användare med email med lösenord inkluderat (för autentisering)
-   * @param {string} email - Användarens email (skiftlägesokänslig)
-   * @returns {Promise<Object|null>} Användardokument med lösenord eller null
+   * Find user by email with password included (for authentication)
+   * @param {string} email - User's email (case-insensitive)
+   * @returns {Promise<Object|null>} User document with password or null
    */
   async findByEmailWithPassword(email) {
     return await User.findOne({ email: email.toLowerCase() }).select('+password');
   }
 
   /**
-   * Hitta användare med användarnamn med lösenord inkluderat (för autentisering)
-   * @param {string} username - Användarnamn
-   * @returns {Promise<Object|null>} Användardokument med lösenord eller null
+   * Find user by username with password included (for authentication)
+   * @param {string} username - Username
+   * @returns {Promise<Object|null>} User document with password or null
    */
   async findByUsernameWithPassword(username) {
     return await User.findOne({ username }).select('+password');
   }
 
   /**
-   * Skapa en ny användare
-   * @param {Object} userData - Användardata (username, email, password, role)
-   * @returns {Promise<Object>} Skapat användardokument
+   * Create a new user
+   * @param {Object} userData - User data (username, email, password, role)
+   * @returns {Promise<Object>} Created user document
    */
   async create(userData) {
     const user = new User(userData);
@@ -72,10 +72,10 @@ class UserRepository {
   }
 
   /**
-   * Uppdatera en befintlig användare
+   * Update an existing user
    * @param {string} id - User ObjectId
-   * @param {Object} userData - Uppdaterade användarfält
-   * @returns {Promise<Object|null>} Uppdaterat användardokument eller null
+   * @param {Object} userData - Updated user fields
+   * @returns {Promise<Object|null>} Updated user document or null
    */
   async update(id, userData) {
     return await User.findByIdAndUpdate(
@@ -86,19 +86,19 @@ class UserRepository {
   }
 
   /**
-   * Radera en användare med ID
+   * Delete a user by ID
    * @param {string} id - User ObjectId
-   * @returns {Promise<Object|null>} Raderat användardokument eller null
+   * @returns {Promise<Object|null>} Deleted user document or null
    */
   async delete(id) {
     return await User.findByIdAndDelete(id);
   }
 
   /**
-   * Kontrollera om användare finns med email eller användarnamn
-   * @param {string} email - Användarens email
-   * @param {string} username - Användarnamn
-   * @returns {Promise<Object|null>} Användardokument om finns, annars null
+   * Check whether a user exists with the given email or username
+   * @param {string} email - User's email
+   * @param {string} username - Username
+   * @returns {Promise<Object|null>} User document if it exists, otherwise null
    */
   async exists(email, username) {
     return await User.findOne({
@@ -110,10 +110,10 @@ class UserRepository {
   }
 
   /**
-   * Uppdatera användares lösenord (aktiverar bcrypt-hashning via modell-middleware)
+   * Update a user's password (triggers bcrypt hashing via model middleware)
    * @param {string} id - User ObjectId
-   * @param {string} newPassword - Nytt lösenord i klartext (kommer att hashas)
-   * @returns {Promise<Object|null>} Uppdaterat användardokument eller null
+   * @param {string} newPassword - New plain-text password (will be hashed)
+   * @returns {Promise<Object|null>} Updated user document or null
    */
   async updatePassword(id, newPassword) {
     const user = await User.findById(id);
@@ -124,18 +124,18 @@ class UserRepository {
   }
 
   /**
-   * Räkna totalt antal användare i databasen
-   * @returns {Promise<number>} Antal användare
+   * Count the total number of users in the database
+   * @returns {Promise<number>} Number of users
    */
   async countUsers() {
     return await User.countDocuments();
   }
 
   /**
-   * Lägg till låt i användarens liked songs
+   * Add a song to the user's liked songs
    * @param {string} userId - User ObjectId
    * @param {string} songId - Song ObjectId
-   * @returns {Promise<Object>} Uppdaterat användardokument
+   * @returns {Promise<Object>} Updated user document
    */
   async likeSong(userId, songId) {
     return await User.findByIdAndUpdate(
@@ -146,10 +146,10 @@ class UserRepository {
   }
 
   /**
-   * Ta bort låt från användarens liked songs
+   * Remove a song from the user's liked songs
    * @param {string} userId - User ObjectId
    * @param {string} songId - Song ObjectId
-   * @returns {Promise<Object>} Uppdaterat användardokument
+   * @returns {Promise<Object>} Updated user document
    */
   async unlikeSong(userId, songId) {
     return await User.findByIdAndUpdate(
@@ -160,10 +160,10 @@ class UserRepository {
   }
 
   /**
-   * Lägg till album i användarens saved albums
+   * Add an album to the user's saved albums
    * @param {string} userId - User ObjectId
    * @param {string} albumId - Album ObjectId
-   * @returns {Promise<Object>} Uppdaterat användardokument
+   * @returns {Promise<Object>} Updated user document
    */
   async saveAlbum(userId, albumId) {
     return await User.findByIdAndUpdate(
@@ -174,10 +174,10 @@ class UserRepository {
   }
 
   /**
-   * Ta bort album från användarens saved albums
+   * Remove an album from the user's saved albums
    * @param {string} userId - User ObjectId
    * @param {string} albumId - Album ObjectId
-   * @returns {Promise<Object>} Uppdaterat användardokument
+   * @returns {Promise<Object>} Updated user document
    */
   async unsaveAlbum(userId, albumId) {
     return await User.findByIdAndUpdate(
@@ -188,10 +188,10 @@ class UserRepository {
   }
 
   /**
-   * Följ en artist
+   * Follow an artist
    * @param {string} userId - User ObjectId
    * @param {string} artistId - Artist ObjectId
-   * @returns {Promise<Object>} Uppdaterat användardokument
+   * @returns {Promise<Object>} Updated user document
    */
   async followArtist(userId, artistId) {
     return await User.findByIdAndUpdate(
@@ -202,10 +202,10 @@ class UserRepository {
   }
 
   /**
-   * Sluta följa en artist
+   * Unfollow an artist
    * @param {string} userId - User ObjectId
    * @param {string} artistId - Artist ObjectId
-   * @returns {Promise<Object>} Uppdaterat användardokument
+   * @returns {Promise<Object>} Updated user document
    */
   async unfollowArtist(userId, artistId) {
     return await User.findByIdAndUpdate(
@@ -216,9 +216,9 @@ class UserRepository {
   }
 
   /**
-   * Hämta användarens library (liked songs, saved albums, followed artists)
+   * Get the user's library (liked songs, saved albums, followed artists)
    * @param {string} userId - User ObjectId
-   * @returns {Promise<Object>} Användardokument med populerade library-fält
+   * @returns {Promise<Object>} User document with populated library fields
    */
   async getUserLibrary(userId) {
     return await User.findById(userId)
@@ -249,10 +249,10 @@ class UserRepository {
   }
 
     /**
-   * Följ en spellista
+   * Follow a playlist
    * @param {string} userId - User ObjectId
    * @param {string} playlistId - Playlist ObjectId
-   * @returns {Promise<Object>} Uppdaterat användardokument
+   * @returns {Promise<Object>} Updated user document
    */
   async addFollowedPlaylist(userId, playlistId) {
     return await User.findByIdAndUpdate(
@@ -262,10 +262,10 @@ class UserRepository {
     ).populate('followedPlaylists')
   }
       /**
-   * Sluta följa en spellista
+   * Unfollow a playlist
    * @param {string} userId - User ObjectId
    * @param {string} playlistId - Playlist ObjectId
-   * @returns {Promise<Object>} Uppdaterat användardokument
+   * @returns {Promise<Object>} Updated user document
    */
   async removeFollowedPlaylist(userId, playlistId){
      return await User.findByIdAndUpdate(

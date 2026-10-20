@@ -2,24 +2,24 @@ import songRepository from '../repositories/songRepository.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/AppError.js';
 
-// Hämta alla låtar eller sök låtar
+// Get all songs or search songs
 const getAllSongs = catchAsync(async (req, res, next) => {
   const searchQuery = req.query.q || req.query.search;
-  
+
   let songs;
   if (searchQuery) {
-    // Sök om query parameter finns
+    // Search if query parameter is present
     songs = await songRepository.search(searchQuery);
   } else {
-    // Hämta alla låtar om ingen sökning
+    // Get all songs if no search query
     songs = await songRepository.findAll();
   }
-  
-  // Returnera array direkt (REST standard)
+
+  // Return array directly (REST standard)
   res.json(songs);
 });
 
-// Hämta en specifik låt med ID
+// Get a specific song by ID
 const getSongById = catchAsync(async (req, res, next) => {
   const song = await songRepository.findById(req.params.id);
   
@@ -30,7 +30,7 @@ const getSongById = catchAsync(async (req, res, next) => {
   res.json(song);
 });
 
-// Skapa ny låt
+// Create new song
 const createSong = catchAsync(async (req, res, next) => {
   const {title, artist, album, duration, genre} = req.body;
 
@@ -45,7 +45,7 @@ const createSong = catchAsync(async (req, res, next) => {
   res.status(201).json(newSong);
 });
 
-// Uppdatera låt
+// Update song
 const updateSong = catchAsync(async (req, res, next) => {
   const song = await songRepository.update(req.params.id, req.body);
   
@@ -56,7 +56,7 @@ const updateSong = catchAsync(async (req, res, next) => {
   res.json(song);
 });
 
-// Radera låt
+// Delete song
 const deleteSong = catchAsync(async (req, res, next) => {
   const song = await songRepository.delete(req.params.id);
   

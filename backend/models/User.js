@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import bcrypt from "bcrypt"
+import "./Playlist.js" // registers the Playlist model for populate()
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -50,7 +51,7 @@ const userSchema = new mongoose.Schema({
 }, {timestamps:true}
 )
 
-// Hooks och metoder FÖRE skapande av modellen
+// Hooks and methods BEFORE model creation
 userSchema.pre('save', async function(next){
     if(!this.isModified('password')) return next()
 

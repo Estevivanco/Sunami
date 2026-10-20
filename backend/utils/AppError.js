@@ -1,6 +1,6 @@
 /**
- * Anpassad felklass för applikationsfel
- * Utökar den inbyggda Error-klassen med statusCode och isOperational-flagga
+ * Custom error class for application errors
+ * Extends the built-in Error class with statusCode and an isOperational flag
  */
 class AppError extends Error {
   constructor(message, statusCode) {
@@ -8,7 +8,7 @@ class AppError extends Error {
     
     this.statusCode = statusCode;
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
-    this.isOperational = true; // Operativa fel vi litar på (vs programmeringsfel)
+    this.isOperational = true; // Operational errors we trust (vs programming errors)
     
     Error.captureStackTrace(this, this.constructor);
   }

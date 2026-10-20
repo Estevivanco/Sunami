@@ -2,17 +2,17 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Tokencache för att undvika onödiga API-anrop
+// Token cache to avoid unnecessary API calls
 let cachedToken = null;
 let tokenExpiry = null;
 
 /**
- * Hämta access token från Spotify (med caching)
- * Token är giltig i 1 timme, så vi cachar den
+ * Get an access token from Spotify (cached)
+ * The token is valid for 1 hour, so we cache it
  */
 const getSpotifyToken = async () => {
   try {
-    // Returnera cached token om den fortfarande är giltig
+    // Return the cached token if it is still valid
     if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
       return cachedToken;
     }
@@ -33,7 +33,7 @@ const getSpotifyToken = async () => {
 
     // Cachea token (giltig i 3600 sekunder = 1 timme)
     cachedToken = response.data.access_token;
-    tokenExpiry = Date.now() + (response.data.expires_in * 1000) - 60000; // -1 minut säkerhetsmarginal
+    tokenExpiry = Date.now() + (response.data.expires_in * 1000) - 60000; // 1 minute safety margin
 
     return cachedToken;
   } catch (error) {
@@ -43,7 +43,7 @@ const getSpotifyToken = async () => {
 };
 
 /**
- * Hämta låtar från en artist
+ * Get songs from an artist
  * @param {string} artistName - Artistens namn
  * @returns {Object} - { artist, albums, songs }
  */
@@ -56,7 +56,7 @@ const getArtistSongs = async (artistName) => {
     const token = await getSpotifyToken();
     const encodedArtistName = encodeURIComponent(artistName.trim());
 
-    // 1. Sök efter artisten
+    // 1. Search for the artist
     const artistResponse = await axios.get(
       `https://api.spotify.com/v1/search?q=${encodedArtistName}&type=artist&limit=1`,
       { 
@@ -72,7 +72,7 @@ const getArtistSongs = async (artistName) => {
 
     const artist = artistResponse.data.artists.items[0];
 
-    // 2. Hämta artistens album
+    // 2. Get the artist's albums
     const albumsResponse = await axios.get(
       `https://api.spotify.com/v1/artists/${artist.id}/albums?limit=5`,
       { 
@@ -97,7 +97,7 @@ const getArtistSongs = async (artistName) => {
       };
     }
 
-    // 3. Hämta låtar från varje album
+    // 3. Get songs from each album
     const songs = [];
     for (const album of albums) {
       try {
@@ -125,7 +125,7 @@ const getArtistSongs = async (artistName) => {
         }
       } catch (trackError) {
         console.error(`Failed to fetch tracks for album ${album.name}:`, trackError.message);
-        // Fortsätt med nästa album
+        // Continue with the next album
       }
     }
 
@@ -149,7 +149,7 @@ const getArtistSongs = async (artistName) => {
       songs
     };
   } catch (error) {
-    // Om det är ett valideringsfel, kasta vidare
+    // If it is a validation error, rethrow
     if (error.message.includes('required') || error.message.includes('not found')) {
       throw error;
     }

@@ -26,7 +26,7 @@ describe('Playlist Integration Tests', () => {
         name: 'My Playlist',
         description: 'Favorite songs',
         songs: [song1._id, song2._id],
-        createdBy: 'TestUser',
+        owner: user._id,
         isPublic: true
       };
 
@@ -36,13 +36,12 @@ describe('Playlist Integration Tests', () => {
       expect(retrieved.name).toBe('My Playlist');
       expect(retrieved.description).toBe('Favorite songs');
       expect(retrieved.songs).toHaveLength(2);
-      expect(retrieved.createdBy).toBe('TestUser');
       expect(retrieved.isPublic).toBe(true);
     });
 
     it('should create empty playlist', async () => {
       const playlistData = {
-        name: 'Empty Playlist'
+        owner: user._id, name: 'Empty Playlist'
       };
 
       const created = await playlistRepository.create(playlistData);
@@ -54,12 +53,12 @@ describe('Playlist Integration Tests', () => {
 
     it('should update playlist information', async () => {
       const playlist = await playlistRepository.create({
-        name: 'Old Name',
+        owner: user._id, name: 'Old Name',
         description: 'Old description'
       });
 
       const updated = await playlistRepository.update(playlist._id, {
-        name: 'New Name',
+        owner: user._id, name: 'New Name',
         description: 'New description',
         isPublic: false
       });
@@ -71,7 +70,7 @@ describe('Playlist Integration Tests', () => {
 
     it('should delete a playlist', async () => {
       const playlist = await playlistRepository.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -84,7 +83,7 @@ describe('Playlist Integration Tests', () => {
   describe('Playlist song management', () => {
     it('should add songs to playlist', async () => {
       const playlist = await playlistRepository.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -97,7 +96,7 @@ describe('Playlist Integration Tests', () => {
 
     it('should remove songs from playlist', async () => {
       const playlist = await playlistRepository.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id, song2._id, song3._id]
       });
 
@@ -110,7 +109,7 @@ describe('Playlist Integration Tests', () => {
 
     it('should prevent duplicate songs', async () => {
       const playlist = await playlistRepository.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -122,7 +121,7 @@ describe('Playlist Integration Tests', () => {
 
     it('should populate song details', async () => {
       const playlist = await playlistRepository.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id, song2._id]
       });
 
@@ -136,19 +135,19 @@ describe('Playlist Integration Tests', () => {
   describe('Public vs Private playlists', () => {
     it('should filter public playlists', async () => {
       await playlistRepository.create({
-        name: 'Public 1',
+        owner: user._id, name: 'Public 1',
         isPublic: true,
         songs: [song1._id]
       });
 
       await playlistRepository.create({
-        name: 'Private 1',
+        owner: user._id, name: 'Private 1',
         isPublic: false,
         songs: [song2._id]
       });
 
       await playlistRepository.create({
-        name: 'Public 2',
+        owner: user._id, name: 'Public 2',
         isPublic: true,
         songs: [song3._id]
       });
@@ -160,7 +159,7 @@ describe('Playlist Integration Tests', () => {
 
     it('should toggle playlist visibility', async () => {
       const playlist = await playlistRepository.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         isPublic: true
       });
 
@@ -200,7 +199,7 @@ describe('Playlist Integration Tests', () => {
 
       const user1Playlists = await playlistRepository.findByOwner(user._id);
       expect(user1Playlists).toHaveLength(2);
-      expect(user1Playlists.every(p => p.owner.toString() === user._id.toString())).toBe(true);
+      expect(user1Playlists.every(p => p.owner._id.toString() === user._id.toString())).toBe(true);
     });
 
     it('should sort user playlists by creation date', async () => {
@@ -222,38 +221,12 @@ describe('Playlist Integration Tests', () => {
     });
   });
 
-  describe('Playlist by creator', () => {
-    it('should find playlists by creator name', async () => {
-      await playlistRepository.create({
-        name: 'Playlist 1',
-        createdBy: 'Admin',
-        songs: [song1._id]
-      });
-
-      await playlistRepository.create({
-        name: 'Playlist 2',
-        createdBy: 'Admin',
-        songs: [song2._id]
-      });
-
-      await playlistRepository.create({
-        name: 'Playlist 3',
-        createdBy: 'User',
-        songs: [song3._id]
-      });
-
-      const adminPlaylists = await playlistRepository.findByCreator('Admin');
-      expect(adminPlaylists).toHaveLength(2);
-      expect(adminPlaylists.every(p => p.createdBy === 'Admin')).toBe(true);
-    });
-  });
-
   describe('Invalid song references', () => {
     it('should filter out invalid songs on creation', async () => {
       const fakeSongId = '507f1f77bcf86cd799439011';
 
       const playlist = await playlistRepository.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id, fakeSongId, song2._id]
       });
 
@@ -269,7 +242,7 @@ describe('Playlist Integration Tests', () => {
       const fakeSongId2 = '507f1f77bcf86cd799439012';
 
       const playlist = await playlistRepository.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [fakeSongId1, fakeSongId2]
       });
 
@@ -280,7 +253,7 @@ describe('Playlist Integration Tests', () => {
   describe('Default name handling', () => {
     it('should preserve valid name', async () => {
       const playlist = await playlistRepository.create({
-        name: 'My Playlist'
+        owner: user._id, name: 'My Playlist'
       });
 
       expect(playlist.name).toBe('My Playlist');
@@ -290,12 +263,12 @@ describe('Playlist Integration Tests', () => {
   describe('Multiple playlists with same songs', () => {
     it('should allow same song in multiple playlists', async () => {
       const playlist1 = await playlistRepository.create({
-        name: 'Playlist 1',
+        owner: user._id, name: 'Playlist 1',
         songs: [song1._id, song2._id]
       });
 
       const playlist2 = await playlistRepository.create({
-        name: 'Playlist 2',
+        owner: user._id, name: 'Playlist 2',
         songs: [song1._id, song3._id]
       });
 
@@ -316,7 +289,7 @@ describe('Playlist Integration Tests', () => {
   describe('Playlist population options', () => {
     it('should support populate=true', async () => {
       const playlist = await playlistRepository.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -327,7 +300,7 @@ describe('Playlist Integration Tests', () => {
 
     it('should support populate=false', async () => {
       const playlist = await playlistRepository.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 
@@ -339,7 +312,7 @@ describe('Playlist Integration Tests', () => {
   describe('Empty playlist operations', () => {
     it('should handle adding to empty playlist', async () => {
       const playlist = await playlistRepository.create({
-        name: 'Empty Playlist',
+        owner: user._id, name: 'Empty Playlist',
         songs: []
       });
 
@@ -351,7 +324,7 @@ describe('Playlist Integration Tests', () => {
 
     it('should handle removing all songs', async () => {
       const playlist = await playlistRepository.create({
-        name: 'Test Playlist',
+        owner: user._id, name: 'Test Playlist',
         songs: [song1._id]
       });
 

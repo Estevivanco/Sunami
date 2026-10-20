@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-// Exempel: Song model
+// Song model
 const songSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -17,17 +17,17 @@ const songSchema = new mongoose.Schema({
     ref: 'Album'
   },
   duration: {
-    type: Number, // i sekunder
+    type: Number, // in seconds
   },
   genres: {
     type: [String],
     default: []
   },
   previewUrl: {
-    type: String  // 30 sek preview från Spotify
+    type: String  // 30-second preview from Spotify
   },
   spotifyUrl: {
-    type: String  // länk till hela låten i Spotify
+    type: String  // link to the full track on Spotify
   },
   playCount: {
     type: Number,
@@ -43,7 +43,7 @@ const songSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save hook - Validera att duration är positiv
+// Pre-save hook - Validate that duration is positive
 songSchema.pre('save', function(next) {
   if (this.duration && this.duration < 0) {
     this.duration = 0;
@@ -67,20 +67,8 @@ songSchema.pre('save', async function (next) {
     }
 })
 
-// Post-save hook - Logga när låt skapas/uppdateras
-songSchema.post('save', function(doc) {
-  console.log(`Song saved: ${doc.title} by ${doc.artist}`);
-});
-
-// Pre-remove hook - Logga före radering
-songSchema.pre('remove', function(next) {
-  console.log(`Removing song: ${this.title}`);
-  next();
-});
-
 // Pre-findOneAndDelete hook
 songSchema.pre('findOneAndDelete', function(next) {
-  console.log('Song is being deleted');
   next();
 });
 

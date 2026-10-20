@@ -1,9 +1,9 @@
 /**
  * Async Handler Wrapper
- * Omsluter asynkrona route handlers för att automatiskt fånga fel och skicka till next()
+ * Wraps async route handlers to automatically catch errors and pass them to next()
  * Detta eliminerar behovet av try-catch-block i varje controller
  * 
- * Användning:
+ * Usage:
  * router.get('/songs', catchAsync(async (req, res, next) => {
  *   const songs = await Song.find();
  *   res.json(songs);

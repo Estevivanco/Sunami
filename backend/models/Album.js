@@ -34,22 +34,22 @@ const albumSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save hook - Validera att artist finns och uppdatera totalTracks
+// Pre-save hook - Validate that artist exists and update totalTracks
 albumSchema.pre('save', async function(next) {
   try {
-    // Förhindra ändring av artist på befintliga album
+    // Prevent changing artist on existing albums
     if (!this.isNew && this.isModified('artist')) {
       return next(new Error('Cannot change artist of an existing album'));
     }
 
-    // Kontrollera att artist finns (använd mongoose.model för att undvika cirkulärt beroende)
+    // Check that artist exists (use mongoose.model to avoid circular dependency)
     const Artist = mongoose.model('Artist');
     const artist = await Artist.findById(this.artist);
     if (!artist) {
       throw new Error('Artist not found');
     }
 
-    // Validera att låtar finns
+    // Validate that songs exist
     if (this.songs && this.songs.length > 0) {
       const songs = await Song.find({ _id: { $in: this.songs } });
       if (songs.length !== this.songs.length) {
@@ -64,12 +64,12 @@ albumSchema.pre('save', async function(next) {
   }
 });
 
-// Post-save hook - Logga när album skapas/uppdateras
+// Post-save hook - Log when album is created/updated
 albumSchema.post('save', function(doc) {
   console.log(`Album saved: ${doc.title}`);
 });
 
-// Pre-remove hook - Logga före radering
+// Pre-remove hook - Log before deletion
 albumSchema.pre('remove', function(next) {
   console.log(`Removing album: ${this.title}`);
   next();

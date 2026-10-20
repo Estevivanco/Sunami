@@ -5,11 +5,6 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/**
- * Add proper genres to artists
- * Run with: node backend/scripts/addGenres.js
- */
-
 const artistGenres = {
   'Bad Bunny': ['reggaeton', 'trap latino', 'latin', 'urbano latino'],
   'Taylor Swift': ['pop', 'country', 'indie folk', 'alternative'],
