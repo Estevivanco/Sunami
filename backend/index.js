@@ -41,6 +41,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// On Vercel (serverless) there is no long-running server: connect lazily per cold start
+if (process.env.VERCEL) {
+  app.use(async (req, res, next) => {
+    try {
+      await connectDB();
+      next();
+    } catch (error) {
+      next(error);
+    }
+  });
+}
+
 app.use('/', routes);
 
 app.get('/', (req, res) => {
@@ -61,18 +73,6 @@ app.get('/health', (req, res) => {
 
 app.use(notFoundHandler);
 app.use(errorHandler);
-
-// On Vercel (serverless) there is no long-running server: connect lazily per cold start
-if (process.env.VERCEL) {
-  app.use(async (req, res, next) => {
-    try {
-      await connectDB();
-      next();
-    } catch (error) {
-      next(error);
-    }
-  });
-}
 
 const startServer = async () => {
   try {
