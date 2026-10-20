@@ -1,8 +1,23 @@
 # Sunami
 
-A full-stack music streaming app inspired by Spotify. Built as a portfolio project to demonstrate modern full-stack development with React and Node.js.
+A full-stack music app inspired by Spotify. Browse artists and albums, like songs, build playlists, and invite friends to collaborate. Built to demonstrate modern full-stack development with React, Node.js and MongoDB.
 
-**Live demo:** *(link your deployed URL here)*
+**Live demo:** [sunami-fe.vercel.app](https://sunami-fe.vercel.app)
+
+> **Try it without signing up:** log in with username `demo` and password `Demo1234`, or register your own account in a few seconds.
+>
+> **Heads up:** the backend runs on a free serverless tier, so the very first request after a quiet period can take a few seconds.
+
+![Sunami demo — liking a song and adding it to a playlist](docs/demo.gif)
+
+| | |
+|---|---|
+| ![Home](docs/screenshots/home.png) | ![Album](docs/screenshots/album.png) |
+| ![Playlist](docs/screenshots/playlist.png) | ![Library](docs/screenshots/library.png) |
+
+### About playback
+
+Sunami doesn't host any audio. Every song stores its Spotify link, so **pressing play opens the track on Spotify**. The bottom player tracks what you selected and lets you step through the queue.
 
 ---
 
@@ -122,7 +137,7 @@ POST   /api/users/me/albums/:id     # save/unsave
 POST   /api/users/me/artists/:id    # follow/unfollow
 POST   /api/playlists
 PUT    /api/playlists/:id
-POST   /api/playlists/:id/songs/:songId
+POST   /api/playlists/:id/songs       # body: { songId }
 POST   /api/playlists/:id/follow
 POST   /api/playlists/:id/collaborators
 POST   /api/auth/logout
