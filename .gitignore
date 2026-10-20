@@ -25,3 +25,7 @@ frontend/.vite
 
 # Misc
 *.local
+
+# Keep the template tracked (placeholders only, no real secrets)
+!.env.example
+!backend/.env.example
