@@ -13,6 +13,13 @@ function Sidebar() {
     const { library, loading, addPlaylist } = useLibrary()
     const [isModalOpen, setIsModalOpen] = useState(false)
 
+    // Own playlists first, then followed ones (de-duplicated)
+    const ownIds = new Set((library.playlists || []).map(p => p._id))
+    const sidebarPlaylists = [
+        ...(library.playlists || []),
+        ...(library.followedPlaylists || []).filter(p => p && p._id && !ownIds.has(p._id))
+    ]
+
     const handleCreatePlaylist = async (playlistData) => {
         const newPlaylist = await createPlaylist(playlistData)
         addPlaylist(newPlaylist)
@@ -61,10 +68,10 @@ function Sidebar() {
                     <div className={styles.playlistsList}>
                         {loading ? (
                             <p className={styles.loadingText}>Loading...</p>
-                        ) : library.playlists?.length === 0 ? (
+                        ) : sidebarPlaylists.length === 0 ? (
                             <p className={styles.emptyText}>No playlists yet</p>
                         ) : (
-                            library.playlists?.map((playlist) => (  // ✅ library.playlists
+                            sidebarPlaylists.map((playlist) => (
                                 <Link
                                     key={playlist._id}
                                     to={`/playlist/${playlist._id}`}

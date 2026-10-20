@@ -16,11 +16,13 @@ function Card({ image, title, subtitle, to, onPlay, round = false }) {
     return (
         <Link to={to} className={styles.card}>
             <div className={`${styles.imageWrapper} ${round ? styles.round : ''}`}>
-                {image ? (
-                    <img src={image} alt={title} className={styles.image} />
-                ) : (
-                    <div className={styles.imageFallback} />
-                )}
+                <div className={styles.imageClip}>
+                    {image ? (
+                        <img src={image} alt={title} className={styles.image} />
+                    ) : (
+                        <div className={styles.imageFallback} />
+                    )}
+                </div>
                 <button
                     className={styles.playBtn}
                     onClick={handlePlayClick}

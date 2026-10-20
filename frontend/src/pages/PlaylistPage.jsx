@@ -256,22 +256,35 @@ const PlaylistPage = () => {
             {/* Collaborator Management — owner only, not on system playlists */}
             {isOwner && !isSystemPlaylist && (
                 <div className={styles.collaborators}>
-                    <h3>Collaborators</h3>
+                    <div className={styles.collaboratorsHeader}>
+                        <h3>Collaborators</h3>
+                        {playlist.collaborators?.length > 0 && (
+                            <span className={styles.collaboratorCount}>{playlist.collaborators.length}</span>
+                        )}
+                    </div>
 
                     {/* Current collaborators */}
                     {playlist.collaborators?.length > 0 ? (
                         <ul className={styles.collaboratorList}>
                             {playlist.collaborators.map(c => (
                                 <li key={c._id} className={styles.collaboratorItem}>
+                                    <span className={styles.avatar}>{c.username?.[0]}</span>
                                     <span>{c.username}</span>
-                                    <button onClick={() => handleRemoveCollaborator(c._id)}>
-                                        Remove
+                                    <button
+                                        className={styles.removeCollaborator}
+                                        onClick={() => handleRemoveCollaborator(c._id)}
+                                        title={`Remove ${c.username}`}
+                                        aria-label={`Remove ${c.username}`}
+                                    >
+                                        ✕
                                     </button>
                                 </li>
                             ))}
                         </ul>
                     ) : (
-                        <p>No collaborators yet</p>
+                        <p className={styles.collaboratorEmpty}>
+                            Invite friends to add songs to this playlist.
+                        </p>
                     )}
 
                     {/* Add collaborator by username search */}
@@ -279,12 +292,12 @@ const PlaylistPage = () => {
                         <div className={styles.searchWrapper}>
                             <input
                                 type="text"
-                                placeholder="Search by username..."
+                                placeholder="Search users to invite"
                                 value={collaboratorSearch}
                                 onChange={(e) => handleCollaboratorSearch(e.target.value)}
                                 autoComplete="off"
                             />
-                            {(searchResults.length > 0 || searchLoading) && (
+                            {(searchResults.length > 0 || searchLoading || collaboratorSearch) && (
                                 <ul className={styles.searchDropdown}>
                                     {searchLoading && (
                                         <li className={styles.searchHint}>Searching...</li>
@@ -295,6 +308,7 @@ const PlaylistPage = () => {
                                             className={styles.searchResult}
                                             onClick={() => handleAddCollaborator(u._id)}
                                         >
+                                            <span className={styles.avatar}>{u.username?.[0]}</span>
                                             {u.username}
                                         </li>
                                     ))}

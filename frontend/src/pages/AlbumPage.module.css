@@ -241,8 +241,10 @@
 }
 
 .iconButton {
+  flex: 0 0 32px;
   width: 32px;
   height: 32px;
+  padding: 0;
   border-radius: 50%;
   border: none;
   background: transparent;
@@ -263,7 +265,6 @@
 .iconButton:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
-  transform: scale(1.1);
 }
 
 .iconButton:active {
@@ -276,8 +277,10 @@
 }
 
 .addButton {
+  flex: 0 0 32px;
   width: 32px;
   height: 32px;
+  padding: 0;
   border-radius: 50%;
   border: none;
   background: transparent;
@@ -298,7 +301,6 @@
 .addButton:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
-  transform: scale(1.1);
 }
 
 .addButton:active {

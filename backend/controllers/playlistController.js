@@ -121,7 +121,7 @@ const addSongToPlaylist = catchAsync(async (req, res, next) => {
 
   // Verify ownership
   const isOwner = (playlist.owner._id || playlist.owner).toString() === req.userId
-  const isCollaborator = playlist.collaborators.some((id) => id.toString() === req.userId)
+  const isCollaborator = playlist.collaborators.some((c) => (c._id || c).toString() === req.userId)
 
   if (!isOwner && !isCollaborator) {
     return next(new AppError('Forbidden: You do not have permission to modify this playlist', 403));
@@ -152,7 +152,7 @@ const removeSongFromPlaylist = catchAsync(async (req, res, next) => {
 
   // Verify ownership
   const isOwner = (playlist.owner._id || playlist.owner).toString() === req.userId
-  const isCollaborator = playlist.collaborators.some((id) => id.toString() === req.userId)
+  const isCollaborator = playlist.collaborators.some((c) => (c._id || c).toString() === req.userId)
 
   if (!isOwner && !isCollaborator) {
     return next(new AppError('Forbidden: You do not have permission to modify this playlist', 403));

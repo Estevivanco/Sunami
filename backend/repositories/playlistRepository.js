@@ -33,7 +33,8 @@ class PlaylistRepository {
             { path: 'album', select: 'title coverImage' }
           ]
         })
-        .populate({ path: 'owner', select: 'username' });
+        .populate({ path: 'owner', select: 'username' })
+        .populate({ path: 'collaborators', select: 'username' });
     }
     return await query;
   }
