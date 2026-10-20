@@ -66,9 +66,13 @@ const getAlbumSongs = catchAsync(async (req, res, next) => {
   
   res.json({
     album: {
+      _id: album._id,
       id: album._id,
       title: album.title,
-      artist: album.artist
+      artist: album.artist,
+      coverImage: album.coverImage,
+      releaseDate: album.releaseDate,
+      genres: album.genres
     },
     count: album.songs.length,
     songs: album.songs

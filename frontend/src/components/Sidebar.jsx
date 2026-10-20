@@ -6,7 +6,7 @@ import { useLibrary } from '../hooks/useLibrary'  // ✅ added
 import { createPlaylist } from '../services/playlistService'
 import { getPlaylistGradient } from '../utils/playlistColor'
 import CreatePlaylistModal from './CreatePlaylistModal'
-import { PlusIcon } from './Icons'
+import { PlusIcon, HomeIcon, SearchIcon, LibraryIcon } from './Icons'
 import styles from './Sidebar.module.css'
 
 function Sidebar() {
@@ -41,15 +41,15 @@ function Sidebar() {
 
             <nav className={styles.sidebarNav}>
                 <Link to={ROUTES.HOME} className={styles.navLink}>
-                    <span className="icon">🏠</span>
+                    <HomeIcon />
                     <span>Home</span>
                 </Link>
                 <Link to={ROUTES.SEARCH} className={styles.navLink}>
-                    <span className="icon">🔍</span>
+                    <SearchIcon />
                     <span>Search</span>
                 </Link>
                 <Link to={ROUTES.LIBRARY} className={styles.navLink}>
-                    <span className="icon">📚</span>
+                    <LibraryIcon />
                     <span>Your Library</span>
                 </Link>
             </nav>

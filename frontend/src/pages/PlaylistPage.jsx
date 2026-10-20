@@ -24,6 +24,7 @@ const PlaylistPage = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [collaboratorSearch, setCollaboratorSearch] = useState('')
+    const [showInvite, setShowInvite] = useState(false)
     const [searchResults, setSearchResults] = useState([])
     const [searchLoading, setSearchLoading] = useState(false)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -261,6 +262,16 @@ const PlaylistPage = () => {
                         {playlist.collaborators?.length > 0 && (
                             <span className={styles.collaboratorCount}>{playlist.collaborators.length}</span>
                         )}
+                        <button
+                            className={styles.inviteToggle}
+                            onClick={() => {
+                                setShowInvite(v => !v)
+                                setCollaboratorSearch('')
+                                setSearchResults([])
+                            }}
+                        >
+                            {showInvite ? 'Done' : '+ Invite'}
+                        </button>
                     </div>
 
                     {/* Current collaborators */}
@@ -288,7 +299,7 @@ const PlaylistPage = () => {
                     )}
 
                     {/* Add collaborator by username search */}
-                    <div className={styles.addCollaborator}>
+                    {showInvite && <div className={styles.addCollaborator}>
                         <div className={styles.searchWrapper}>
                             <input
                                 type="text"
@@ -318,7 +329,7 @@ const PlaylistPage = () => {
                                 </ul>
                             )}
                         </div>
-                    </div>
+                    </div>}
                 </div>
             )}
 

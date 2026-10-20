@@ -88,9 +88,9 @@
 }
 
 .categoryCard {
-  aspect-ratio: 1;
+  aspect-ratio: 16 / 9;
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 16px 20px;
   display: flex;
   align-items: flex-end;
   cursor: pointer;
@@ -474,4 +474,8 @@
   .albumsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+.sunamiSection {
+  margin-top: 40px;
 }

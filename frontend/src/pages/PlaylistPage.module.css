@@ -11,6 +11,30 @@
   align-items: flex-end;
   position: relative;
 }
+.playlistMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.playlistOwner {
+  color: #fff;
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.actions .followButton {
+  margin-top: 0;
+}
+
 .playlistActions {
   position: absolute;
   top: 0;
@@ -175,6 +199,24 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
+}
+
+.inviteToggle {
+  margin-left: auto;
+  align-self: center;
+  padding: 6px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.inviteToggle:hover {
+  border-color: #fff;
 }
 
 .collaborators h3 {
