@@ -5,9 +5,11 @@
 
 import { useState, useEffect } from 'react'
 import { fetchMyPlaylists, addSongToPlaylist } from '../services/playlistService'
+import { useLibrary } from '../hooks/useLibrary'
 import styles from './AddToPlaylistModal.module.css'
 
 function AddToPlaylistModal({ isOpen, onClose, song }) {
+    const { refreshPlaylists } = useLibrary()
     const [playlists, setPlaylists] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [isAdding, setIsAdding] = useState(false)
@@ -40,7 +42,7 @@ function AddToPlaylistModal({ isOpen, onClose, song }) {
             setSuccessMessage(null)
             
             await addSongToPlaylist(playlistId, song._id)
-            
+            await refreshPlaylists()
             setSuccessMessage('Song added to playlist!')
             
             // Close modal after brief success message
@@ -68,7 +70,7 @@ function AddToPlaylistModal({ isOpen, onClose, song }) {
         <div className={styles.modalOverlay} onClick={handleClose}>
             <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.modalHeader}>
-                    <h2>Lägg till i spellista</h2>
+                    <h2>Add to playlist</h2>
                     <button 
                         className={styles.closeButton}
                         onClick={handleClose}
@@ -107,12 +109,12 @@ function AddToPlaylistModal({ isOpen, onClose, song }) {
                     )}
 
                     {isLoading ? (
-                        <div className={styles.loading}>Laddar spellistor...</div>
+                        <div className={styles.loading}>Loading playlists...</div>
                     ) : playlists.length === 0 ? (
                         <div className={styles.empty}>
-                            <p>Du har inga spellistor än.</p>
+                            <p>You have no playlists yet.</p>
                             <p className={styles.emptyHint}>
-                                Skapa en spellista för att börja lägga till låtar!
+                                Create a playlist to start adding songs!
                             </p>
                         </div>
                     ) : (
@@ -128,7 +130,7 @@ function AddToPlaylistModal({ isOpen, onClose, song }) {
                                     <div className={styles.playlistInfo}>
                                         <div className={styles.playlistName}>{playlist.name}</div>
                                         <div className={styles.playlistMeta}>
-                                            {playlist.songs?.length || 0} låtar
+                                            {playlist.songs?.length || 0} {playlist.songs?.length === 1 ? 'song' : 'songs'}
                                         </div>
                                     </div>
                                 </button>

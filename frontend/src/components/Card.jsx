@@ -1,38 +1,40 @@
-/**
- * Card Component
- * Reusable card for displaying albums, playlists, artists
- * 
- * Props:
- * - image: Album/artist/playlist cover image
- * - title: Main title
- * - subtitle: Secondary text (artist name, song count, etc.)
- * - onClick: Handler when card is clicked
- * - type: 'album' | 'artist' | 'playlist' (for styling)
- * 
- * Features:
- * - Hover effects
- * - Play button on hover
- * - Rounded corners for artist cards
- * - Responsive sizing
- * 
- * Example usage:
- * <Card 
- *   image="album-cover.jpg"
- *   title="Album Name"
- *   subtitle="Artist Name"
- *   onClick={() => navigate(`/album/${id}`)}
- *   type="album"
- * />
- * 
- * Example structure:
- * <div className="card" onClick={onClick}>
- *   <div className="card-image">
- *     <img src={image} alt={title} />
- *     <button className="play-btn">▶</button>
- *   </div>
- *   <h3>{title}</h3>
- *   <p>{subtitle}</p>
- * </div>
- */
+import { Link } from 'react-router-dom'
+import styles from './Card.module.css'
 
-// TODO: Implement Card component
+/**
+ * Reusable card for albums, artists, and playlists.
+ * Shows a hover play button that calls onPlay (if provided) or navigates.
+ * Set round=true for circular images (artists).
+ */
+function Card({ image, title, subtitle, to, onPlay, round = false }) {
+    const handlePlayClick = (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (onPlay) onPlay()
+    }
+
+    return (
+        <Link to={to} className={styles.card}>
+            <div className={`${styles.imageWrapper} ${round ? styles.round : ''}`}>
+                {image ? (
+                    <img src={image} alt={title} className={styles.image} />
+                ) : (
+                    <div className={styles.imageFallback} />
+                )}
+                <button
+                    className={styles.playBtn}
+                    onClick={handlePlayClick}
+                    aria-label={`Play ${title}`}
+                >
+                    ▶
+                </button>
+            </div>
+            <div className={styles.info}>
+                <h3 className={styles.title}>{title}</h3>
+                {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+            </div>
+        </Link>
+    )
+}
+
+export default Card

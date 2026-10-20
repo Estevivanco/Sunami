@@ -58,7 +58,7 @@ function CreatePlaylistModal({ isOpen, onClose, onCreatePlaylist }) {
         <div className={styles.modalOverlay} onClick={handleClose}>
             <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.modalHeader}>
-                    <h2>Skapa ny spellista</h2>
+                    <h2>Create playlist</h2>
                     <button 
                         className={styles.closeButton}
                         onClick={handleClose}
@@ -78,13 +78,13 @@ function CreatePlaylistModal({ isOpen, onClose, onCreatePlaylist }) {
 
                     <div className={styles.inputGroup}>
                         <label htmlFor="playlistName" className={styles.label}>
-                            Namn
+                            Name
                         </label>
                         <input
                             id="playlistName"
                             type="text"
                             className={styles.input}
-                            placeholder="Min spellista"
+                            placeholder="My playlist"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             disabled={isCreating}
@@ -95,12 +95,12 @@ function CreatePlaylistModal({ isOpen, onClose, onCreatePlaylist }) {
 
                     <div className={styles.inputGroup}>
                         <label htmlFor="playlistDescription" className={styles.label}>
-                            Beskrivning (valfritt)
+                            Description (optional)
                         </label>
                         <textarea
                             id="playlistDescription"
                             className={styles.textarea}
-                            placeholder="Lägg till en valfri beskrivning"
+                            placeholder="Add an optional description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             disabled={isCreating}
@@ -119,7 +119,7 @@ function CreatePlaylistModal({ isOpen, onClose, onCreatePlaylist }) {
                             disabled={isCreating}
                         />
                         <label htmlFor="isPublic" className={styles.checkboxLabel}>
-                            Gör spellistan publik
+                            Make playlist public
                         </label>
                     </div>
 
@@ -130,14 +130,14 @@ function CreatePlaylistModal({ isOpen, onClose, onCreatePlaylist }) {
                             onClick={handleClose}
                             disabled={isCreating}
                         >
-                            Avbryt
+                            Cancel
                         </button>
                         <button
                             type="submit"
                             className={styles.createButton}
                             disabled={isCreating || !name.trim()}
                         >
-                            {isCreating ? 'Skapar...' : 'Skapa'}
+                            {isCreating ? 'Creating...' : 'Create'}
                         </button>
                     </div>
                 </form>

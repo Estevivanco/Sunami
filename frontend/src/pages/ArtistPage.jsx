@@ -39,7 +39,10 @@ import { formatNumberCompact } from "../utils/formatNumber"
 import { usePlayer } from "../hooks/usePlayer"
 import { useAuth } from "../hooks/useAuth"
 import { useLibrary } from "../hooks/useLibrary"
+import { useToast } from "../hooks/useToast"
 import AddToPlaylistModal from "../components/AddToPlaylistModal"
+import Toast from "../components/Toast"
+import Skeleton from "../components/Skeleton"
 import styles from "./ArtistPage.module.css"
 
 /**
@@ -48,10 +51,11 @@ import styles from "./ArtistPage.module.css"
  */
 const ArtistPage = () => {
   const { id } = useParams() // Get artist ID from URL
-  const { play } = usePlayer() // Get play function from player context
+  const { play, currentSong } = usePlayer()
   const { user } = useAuth() // Get user to check authentication
   const { isSongLiked, addLikedSong, removeLikedSong, isArtistFollowed, addFollowedArtist, removeFollowedArtist } = useLibrary()
-  
+  const { toast, showToast, clearToast } = useToast()
+
   const [artist, setArtist] = useState(null)
   const [songs, setSongs] = useState([])
   const [albums, setAlbums] = useState([])
@@ -60,45 +64,76 @@ const ArtistPage = () => {
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false)
   const [selectedSong, setSelectedSong] = useState(null)
 
+  const loadArtistData = async (signal) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const [artistData, songsData, albumsData] = await Promise.all([
+        fetchArtistsById(id, signal),
+        fetchArtistsByIdWithSongs(id, signal),
+        fetchArtistsByIdWithAlbums(id, signal)
+      ])
+      setArtist(artistData)
+      setSongs(songsData.songs || [])
+      setAlbums(albumsData || [])
+    } catch (err) {
+      if (err.name === 'AbortError') return
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     const controller = new AbortController()
-    const loadArtistData = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        
-        // Fetch artist details, songs, and albums in parallel
-        const [artistData, songsData, albumsData] = await Promise.all([
-          fetchArtistsById(id, controller.signal),
-          fetchArtistsByIdWithSongs(id, controller.signal),
-          fetchArtistsByIdWithAlbums(id, controller.signal)
-        ])
-        
-        setArtist(artistData)
-        setSongs(songsData.songs || [])
-        setAlbums(albumsData || [])
-      } catch (err) {
-        if(err.name === 'AbortError') return
-        setError(err.message)
-        console.error('Error fetching artist:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadArtistData()
+    loadArtistData(controller.signal)
     return () => controller.abort()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
 
   if (loading) {
-    return <div className="page">Loading artist...</div>
+    return (
+      <div className={`page ${styles.artistPage}`}>
+        <div className={styles.artistHeader}>
+          <Skeleton width="200px" height="200px" borderRadius="50%" />
+          <div className={styles.artistInfo} style={{ gap: 12 }}>
+            <Skeleton width="240px" height="40px" />
+            <Skeleton width="140px" height="16px" />
+            <Skeleton width="110px" height="36px" borderRadius="24px" style={{ marginTop: 8 }} />
+          </div>
+        </div>
+        <section className={styles.artistSection}>
+          <Skeleton width="120px" height="24px" style={{ marginBottom: 16 }} />
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'center', padding: '10px 0' }}>
+              <Skeleton width="20px"  height="16px" />
+              <Skeleton width="55%"   height="16px" />
+              <Skeleton width="15%"   height="16px" style={{ marginLeft: 'auto' }} />
+            </div>
+          ))}
+        </section>
+        <section className={styles.artistSection}>
+          <Skeleton width="100px" height="24px" style={{ marginBottom: 16 }} />
+          <div className={styles.albumsGrid}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className={styles.albumCard}>
+                <Skeleton width="100%" height="160px" />
+                <Skeleton width="75%"  height="16px" style={{ marginTop: 10 }} />
+                <Skeleton width="45%"  height="13px" style={{ marginTop: 6  }} />
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    )
   }
 
   if (error) {
     return (
       <div className="page">
         <p>Error: {error}</p>
-        <button onClick={loadArtistData}>Try Again</button>
+        <button onClick={() => loadArtistData()}>Try Again</button>
       </div>
     )
   }
@@ -113,7 +148,7 @@ const ArtistPage = () => {
     .slice(0, 10)
 
   // Handle song click - play song and set queue
-  const handleSongClick = (song, index) => {
+  const handleSongClick = (song) => {
     play(song, popularSongs)
   }
 
@@ -126,45 +161,36 @@ const ArtistPage = () => {
     event.stopPropagation()
     try {
       const isLiked = isSongLiked(song._id)
-      console.log('Toggling like for song:', song._id, 'Current state:', isLiked)
-      
       if (isLiked) {
-        const response = await unlikeSong(song._id)
-        console.log('Unlike response:', response)
+        await unlikeSong(song._id)
         removeLikedSong(song._id)
       } else {
-        const response = await likeSong(song._id)
-        console.log('Like response:', response)
-        addLikedSong(song._id)
+        await likeSong(song._id)
+        addLikedSong(song)
       }
     } catch (err) {
-      console.error('Error toggling like:', err)
-      alert('Failed to like/unlike song: ' + err.message)
+      showToast('Failed to like/unlike song: ' + err.message)
     }
   }
 
   const handleFollowArtist = async () => {
     try {
       const isFollowing = isArtistFollowed(id)
-      console.log('Toggling follow for artist:', id, 'Current state:', isFollowing)
-      
       if (isFollowing) {
-        const response = await unfollowArtist(id)
-        console.log('Unfollow response:', response)
+        await unfollowArtist(id)
         removeFollowedArtist(id)
       } else {
-        const response = await followArtist(id)
-        console.log('Follow response:', response)
-        addFollowedArtist(id)
+        await followArtist(id)
+        addFollowedArtist(artist)
       }
     } catch (err) {
-      console.error('Error toggling follow:', err)
-      alert('Failed to follow/unfollow artist: ' + err.message)
+      showToast('Failed to follow/unfollow artist: ' + err.message)
     }
   }
 
   return (
     <div className={`page ${styles.artistPage}`}>
+      <Toast toast={toast} onDismiss={clearToast} />
       {/* Artist Header */}
       <div className={styles.artistHeader}>
         {artist.image && (
@@ -208,11 +234,19 @@ const ArtistPage = () => {
             {/* Table Rows */}
             <div className={styles.songsList}>
               {popularSongs.map((song, index) => (
-                <div 
-                  key={song._id} 
-                  className={styles.songItem}
+                <div
+                  key={song._id}
+                  className={`${styles.songItem} ${currentSong?._id === song._id ? styles.isPlaying : ''}`}
                 >
-                  <span className={styles.songNumber}>{index + 1}</span>
+                  {currentSong?._id === song._id ? (
+                    <div className="equalizerBars">
+                      <span className="equalizerBar" />
+                      <span className="equalizerBar" />
+                      <span className="equalizerBar" />
+                    </div>
+                  ) : (
+                    <span className={styles.songNumber}>{index + 1}</span>
+                  )}
                   <div className={styles.songInfo}>
                     <div 
                       className={styles.songTitle}

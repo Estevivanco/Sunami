@@ -4,6 +4,7 @@ import { handleLogin, handleLogout, handleRegister } from "../services/authServi
 
 
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext()
 
 export const AuthProvider = ({children}) => {

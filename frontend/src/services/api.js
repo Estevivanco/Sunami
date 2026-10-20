@@ -47,7 +47,7 @@ export const fetchWithAuth = async (url, options = {}, signal) => {
                     ...config,
                     headers: newHeaders
                 })
-            } catch (refreshError) {
+            } catch {
                 localStorage.removeItem('accessToken')
                 localStorage.removeItem('user')
                 window.location.href = '/login'

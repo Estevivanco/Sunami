@@ -27,18 +27,7 @@ const LoginPage = () => {
 
     // Show loading while checking auth status
     if (authLoading) {
-        return (
-            <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                height: '100vh',
-                background: 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)',
-                color: '#fff'
-            }}>
-                Loading...
-            </div>
-        )
+        return <div className="loadingScreen">Loading...</div>
     }
 
     const submitLogin = async (e) => {

@@ -110,6 +110,28 @@
   z-index: 1;
 }
 
+/* Category card colour variants */
+.categoryArtists  { background-color: #1db954; }
+.categoryAlbums   { background-color: #e13300; }
+.categorySongs    { background-color: #8d67ab; }
+.categoryPlaylists { background-color: #bc5900; }
+
+/* Playlist cover fallback */
+.playlistCover {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: #282828;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.playlistEmoji {
+  font-size: 40px;
+}
+
 /* Results Section */
 .resultsSection {
   margin-top: 24px;
@@ -147,11 +169,29 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.songImageWrapper {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
 .songImage {
   width: 48px;
   height: 48px;
   border-radius: 4px;
   object-fit: cover;
+}
+
+.songImageOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
 }
 
 .songInfo {
@@ -173,6 +213,10 @@
 
 .songTitle:hover {
   text-decoration: underline;
+}
+
+.isPlaying .songTitle {
+  color: #1ed760;
 }
 
 .songMeta {

@@ -16,6 +16,7 @@ import ArtistPage from './pages/ArtistPage'
 import AlbumPage from './pages/AlbumPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
                           <Route path={ROUTES.PLAYLIST} element={<PlaylistPage/>} />
                           <Route path={ROUTES.ARTIST} element={<ArtistPage />} />
                           <Route path={ROUTES.ALBUM} element={<AlbumPage/>} />
+                          <Route path="*" element={<NotFoundPage />} />
                         </Routes>
                       </div>
                     </main>

@@ -194,6 +194,10 @@
   color: #1db954;
 }
 
+.isPlaying .trackTitle {
+  color: #1ed760;
+}
+
 .trackArtist {
   font-size: 14px;
   color: #b3b3b3;

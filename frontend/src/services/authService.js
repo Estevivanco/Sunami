@@ -27,7 +27,7 @@ export const handleLogin = async (emailOrUsername, password) => {
     const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        credentials: 'include', // Nödvändigt för att ta emot httpOnly cookies
+        credentials: 'include', // Required to receive httpOnly cookies
         body: JSON.stringify(
             isEmail 
                 ? { email: emailOrUsername, password }
@@ -53,7 +53,7 @@ export const handleRegister = async (email, username, password) => {
     const response = await fetch(API_ENDPOINTS.REGISTER, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        credentials: 'include', // Nödvändigt för att ta emot httpOnly cookies
+        credentials: 'include', // Required to receive httpOnly cookies
         body: JSON.stringify({username, email, password})
     })
 
@@ -71,10 +71,10 @@ export const handleRegister = async (email, username, password) => {
 export const handleLogout = async () => {
     await fetch(API_ENDPOINTS.LOGOUT, {
         method: 'POST',
-        credentials: 'include' // Skickar med cookies så backend kan rensa refresh token
+        credentials: 'include' // Send cookies so the backend can clear the refresh token
     })
 
-    // Ta bort access token och user från localStorage
+    // Remove access token and user from localStorage
     localStorage.removeItem('accessToken')
     localStorage.removeItem('user')
 }

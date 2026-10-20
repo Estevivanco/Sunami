@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { fetchMyPlaylists, createPlaylist } from '../services/playlistService'
+import { createPlaylist } from '../services/playlistService'
 import { getPlaylistRoute, getArtistRoute, getAlbumRoute } from '../constants/routes'
 import { formatDuration } from '../utils/formatDuration'
 import { useLibrary } from '../hooks/useLibrary'
+import { getPlaylistGradient } from '../utils/playlistColor'
 import { usePlayer } from '../hooks/usePlayer'
 import CreatePlaylistModal from '../components/CreatePlaylistModal'
 import styles from './LibraryPage.module.css'
@@ -95,7 +96,7 @@ const LibraryPage = () => {
                 {activeTab === 'songs' && (
                     <div className={styles.songsList}>
                         {likedSongs.length > 0 ? (
-                            likedSongs.map((song, index) => (
+                            likedSongs.map((song) => (
                                 <div
                                     key={song._id}
                                     className={styles.songItem}
@@ -144,9 +145,10 @@ const LibraryPage = () => {
                                             to={getPlaylistRoute(playlist._id)}
                                             className={styles.playlistRow}
                                         >
-                                            <div className={styles.playlistThumb}>
-                                                <span className={styles.playlistThumbIcon}>🎵</span>
-                                            </div>
+                                            <div
+                                                className={styles.playlistThumb}
+                                                style={{ background: getPlaylistGradient(playlist.name) }}
+                                            />
                                             <div className={styles.playlistRowInfo}>
                                                 <span className={styles.playlistRowName}>{playlist.name}</span>
                                                 <span className={styles.playlistRowMeta}>
@@ -179,9 +181,10 @@ const LibraryPage = () => {
                                             to={getPlaylistRoute(playlist._id)}
                                             className={styles.playlistRow}
                                         >
-                                            <div className={styles.playlistThumb}>
-                                                <span className={styles.playlistThumbIcon}>🎵</span>
-                                            </div>
+                                            <div
+                                                className={styles.playlistThumb}
+                                                style={{ background: getPlaylistGradient(playlist.name) }}
+                                            />
                                             <div className={styles.playlistRowInfo}>
                                                 <span className={styles.playlistRowName}>{playlist.name}</span>
                                                 <span className={styles.playlistRowMeta}>

@@ -10,9 +10,13 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchArtists } from '../services/artistService'
-import { fetchAlbums } from '../services/albumService'
+import { fetchAlbums, fetchAlbumsByIdWithSongs } from '../services/albumService'
 import { getArtistRoute, getAlbumRoute, getPlaylistRoute } from '../constants/routes'
 import { useLibrary } from '../hooks/useLibrary'
+import { usePlayer } from '../hooks/usePlayer'
+import { getPlaylistGradient } from '../utils/playlistColor'
+import Skeleton from '../components/Skeleton'
+import Card from '../components/Card'
 import styles from './HomePage.module.css'
 
 const HomePage = () => {
@@ -21,45 +25,71 @@ const HomePage = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const { library, loading: libraryLoading } = useLibrary()
+    const { play } = usePlayer()
+
+    const handlePlayAlbum = async (albumId) => {
+        try {
+            const data = await fetchAlbumsByIdWithSongs(albumId)
+            const songs = data.songs || []
+            if (songs.length > 0) play(songs[0], songs)
+        } catch {
+            // silently fail — user can still navigate to the album
+        }
+    }
     const sunamiPlaylists = (library?.allPlaylists || []).filter(p => p.isSystemPlaylist)
+
+    const loadData = async (signal) => {
+        try {
+            setLoading(true)
+            setError(null)
+            const [artistsData, albumsData] = await Promise.all([
+                fetchArtists(signal),
+                fetchAlbums(signal)
+            ])
+            setArtists(artistsData)
+            setAlbums(albumsData)
+        } catch (err) {
+            if (err.name === 'AbortError') return
+            setError(err.message)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     useEffect(() => {
         const controller = new AbortController()
-        const loadData = async () => {
-            try {
-                setLoading(true)
-                setError(null)
-                
-                const [artistsData, albumsData] = await Promise.all([
-                    fetchArtists(controller.signal),
-                    fetchAlbums(controller.signal)
-                ])
-                
-                setArtists(artistsData)
-                setAlbums(albumsData)
-            } catch (err) {
-                if(err.name === 'AbortError') return
-                setError(err.message)
-                console.error('Error loading homepage data:', err)
-            } finally {
-                setLoading(false)
-            }
-        }
-        loadData()
+        loadData(controller.signal)
         return () => controller.abort()
     }, [])
 
 
 
     if (loading || libraryLoading) {
-        return <div className="page">Loading...</div>
+        return (
+            <div className={`page ${styles.homePage}`}>
+                {[0, 1].map(section => (
+                    <section key={section} className={styles.section}>
+                        <Skeleton width="160px" height="28px" style={{ marginBottom: 16 }} />
+                        <div className={styles.albumsGrid}>
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <div key={i} className={styles.albumCard}>
+                                    <Skeleton width="100%" height="180px" />
+                                    <Skeleton width="80%" height="16px" style={{ marginTop: 12 }} />
+                                    <Skeleton width="50%" height="13px" style={{ marginTop: 8 }} />
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                ))}
+            </div>
+        )
     }
 
     if (error) {
         return (
             <div className="page">
                 <p>Error: {error}</p>
-                <button onClick={loadData}>Try Again</button>
+                <button onClick={() => loadData()}>Try Again</button>
             </div>
         )
     }
@@ -72,23 +102,14 @@ const HomePage = () => {
                 {artists.length > 0 ? (
                     <div className={styles.artistsGrid}>
                         {artists.map((artist) => (
-                            <Link
+                            <Card
                                 key={artist._id}
                                 to={getArtistRoute(artist._id)}
-                                className={styles.artistCard}
-                            >
-                                {artist.image && (
-                                    <img
-                                        src={artist.image}
-                                        alt={artist.name}
-                                        className={styles.artistImage}
-                                    />
-                                )}
-                                <div className={styles.artistInfo}>
-                                    <h3 className={styles.artistName}>{artist.name}</h3>
-                                    <p className={styles.artistMeta}>Artist</p>
-                                </div>
-                            </Link>
+                                image={artist.image}
+                                title={artist.name}
+                                subtitle="Artist"
+                                round
+                            />
                         ))}
                     </div>
                 ) : (
@@ -102,25 +123,14 @@ const HomePage = () => {
                 {albums.length > 0 ? (
                     <div className={styles.albumsGrid}>
                         {albums.map((album) => (
-                            <Link
+                            <Card
                                 key={album._id}
                                 to={getAlbumRoute(album._id)}
-                                className={styles.albumCard}
-                            >
-                                {album.coverImage && (
-                                    <img
-                                        src={album.coverImage}
-                                        alt={album.title}
-                                        className={styles.albumCover}
-                                    />
-                                )}
-                                <div className={styles.albumInfo}>
-                                    <h3 className={styles.albumTitle}>{album.title}</h3>
-                                    <p className={styles.albumArtist}>
-                                        {album.artist?.name || 'Unknown Artist'}
-                                    </p>
-                                </div>
-                            </Link>
+                                image={album.coverImage}
+                                title={album.title}
+                                subtitle={album.artist?.name || 'Unknown Artist'}
+                                onPlay={() => handlePlayAlbum(album._id)}
+                            />
                         ))}
                     </div>
                 ) : (
@@ -138,9 +148,10 @@ const HomePage = () => {
                                 to={getPlaylistRoute(playlist._id)}
                                 className={styles.albumCard}
                             >
-                                <div className={styles.albumCover} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#282828' }}>
-                                    <span className={styles.playlistIcon} style={{ fontSize: 40 }}>🎵</span>
-                                </div>
+                                <div
+                                    className={styles.playlistCover}
+                                    style={{ background: getPlaylistGradient(playlist.name) }}
+                                />
                                 <div className={styles.albumInfo}>
                                     <h3 className={styles.albumTitle}>{playlist.name}</h3>
                                     <p className={styles.albumArtist}>{playlist.songs?.length || 0} songs</p>

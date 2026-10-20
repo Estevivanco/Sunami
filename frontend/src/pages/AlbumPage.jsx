@@ -40,52 +40,77 @@ import { formatNumberCompact } from "../utils/formatNumber"
 import { usePlayer } from "../hooks/usePlayer"
 import { useAuth } from "../hooks/useAuth"
 import { useLibrary } from "../hooks/useLibrary"
+import { useToast } from "../hooks/useToast"
 import AddToPlaylistModal from "../components/AddToPlaylistModal"
+import Toast from "../components/Toast"
+import Skeleton from "../components/Skeleton"
 import styles from "./AlbumPage.module.css"
 
 const AlbumPage = () => {
     const { id } = useParams() // Get album ID from URL
-    const { play } = usePlayer() // Get play function from player context
+    const { play, currentSong } = usePlayer()
     const { user } = useAuth() // Get user to check authentication
     const { isSongLiked, addLikedSong, removeLikedSong, isAlbumSaved, addSavedAlbum, removeSavedAlbum } = useLibrary()
-    
+    const { toast, showToast, clearToast } = useToast()
+
     const [album, setAlbum] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false)
     const [selectedSong, setSelectedSong] = useState(null)
 
+    const loadAlbumData = async (signal) => {
+        try {
+            setLoading(true)
+            setError(null)
+            const albumData = await fetchAlbumsByIdWithSongs(id, signal)
+            setAlbum(albumData)
+        } catch (err) {
+            if (err.name === 'AbortError') return
+            setError(err.message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
     useEffect(() => {
         const controller = new AbortController()
-        const loadAlbumData = async () => {
-            try {
-              setLoading(true)
-              setError(null)
-              const albumData = await fetchAlbumsByIdWithSongs(id, controller.signal)
-              console.log(albumData)
-              setAlbum(albumData)
-            } catch (err) {
-            if (err.name === 'AbortError') return
-              setError(err.message)
-              console.error('Error fetching album:', err)
-            } finally {
-              setLoading(false)
-            }
-          }
-        loadAlbumData()
+        loadAlbumData(controller.signal)
         return () => controller.abort()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
 
 
     if (loading) {
-        return <div className="page">Loading album...</div>
+        return (
+            <div className={`page ${styles.albumPage}`}>
+                <div className={styles.albumHeader}>
+                    <Skeleton width="232px" height="232px" />
+                    <div className={styles.albumInfo} style={{ gap: 12 }}>
+                        <Skeleton width="60px"  height="12px" />
+                        <Skeleton width="280px" height="40px" />
+                        <Skeleton width="180px" height="16px" />
+                        <Skeleton width="100px" height="36px" borderRadius="24px" style={{ marginTop: 8 }} />
+                    </div>
+                </div>
+                <div className={styles.albumContent}>
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'center', padding: '10px 16px' }}>
+                            <Skeleton width="20px"  height="16px" />
+                            <Skeleton width="60%"   height="16px" />
+                            <Skeleton width="10%"   height="16px" style={{ marginLeft: 'auto' }} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )
     }
 
     if (error) {
         return (
             <div className="page">
                 <p>Error: {error}</p>
-                <button onClick={loadAlbumData}>Try Again</button>
+                <button onClick={() => loadAlbumData()}>Try Again</button>
             </div>
         )
     }
@@ -99,7 +124,7 @@ const AlbumPage = () => {
     const artist = albumInfo.artist || {}
 
     // Handle song click - play song and set queue to all album songs
-    const handleSongClick = (song, index) => {
+    const handleSongClick = (song) => {
         play(song, songs)
     }
 
@@ -112,45 +137,36 @@ const AlbumPage = () => {
         event.stopPropagation()
         try {
             const isLiked = isSongLiked(song._id)
-            console.log('Toggling like for song:', song._id, 'Current state:', isLiked)
-            
             if (isLiked) {
-                const response = await unlikeSong(song._id)
-                console.log('Unlike response:', response)
+                await unlikeSong(song._id)
                 removeLikedSong(song._id)
             } else {
-                const response = await likeSong(song._id)
-                console.log('Like response:', response)
-                addLikedSong(song._id)
+                await likeSong(song._id)
+                addLikedSong(song)
             }
         } catch (err) {
-            console.error('Error toggling like:', err)
-            alert('Failed to like/unlike song: ' + err.message)
+            showToast('Failed to like/unlike song: ' + err.message)
         }
     }
 
     const handleSaveAlbum = async () => {
         try {
             const isSaved = isAlbumSaved(id)
-            console.log('Toggling save for album:', id, 'Current state:', isSaved)
-            
             if (isSaved) {
-                const response = await unsaveAlbum(id)
-                console.log('Unsave response:', response)
+                await unsaveAlbum(id)
                 removeSavedAlbum(id)
             } else {
-                const response = await saveAlbum(id)
-                console.log('Save response:', response)
-                addSavedAlbum(id)
+                await saveAlbum(id)
+                addSavedAlbum(albumInfo)
             }
         } catch (err) {
-            console.error('Error toggling save album:', err)
-            alert('Failed to save/unsave album: ' + err.message)
+            showToast('Failed to save/unsave album: ' + err.message)
         }
     }
 
     return (
         <div className={`page ${styles.albumPage}`}>
+            <Toast toast={toast} onDismiss={clearToast} />
             {/* Album Header */}
             <div className={styles.albumHeader}>
                 {albumInfo.coverImage && (
@@ -207,11 +223,19 @@ const AlbumPage = () => {
                         {/* Track Rows */}
                         <div className={styles.tracksList}>
                             {songs.map((song, index) => (
-                                <div 
-                                    key={song._id} 
-                                    className={styles.trackItem}
+                                <div
+                                    key={song._id}
+                                    className={`${styles.trackItem} ${currentSong?._id === song._id ? styles.isPlaying : ''}`}
                                 >
-                                    <span className={styles.trackNumber}>{index + 1}</span>
+                                    {currentSong?._id === song._id ? (
+                                        <div className="equalizerBars">
+                                            <span className="equalizerBar" />
+                                            <span className="equalizerBar" />
+                                            <span className="equalizerBar" />
+                                        </div>
+                                    ) : (
+                                        <span className={styles.trackNumber}>{index + 1}</span>
+                                    )}
                                     <div className={styles.trackInfo}>
                                         <div 
                                             className={styles.trackTitle}

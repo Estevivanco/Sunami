@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, useContext } from 'react'
 import { getUserLibrary } from '../services/userService'
 import { useAuth } from '../hooks/useAuth'
-import { fetchMyPlaylists, fetchPlaylists, fetchPublicPlaylists } from '../services/playlistService'
+import { fetchMyPlaylists, fetchPublicPlaylists } from '../services/playlistService'
 
 const LibraryContext = createContext()
 
@@ -12,7 +12,7 @@ export const LibraryProvider = ({ children }) => {
         savedAlbums: [],
         followedArtists: [],
         followedPlaylists: [],
-        playlist: []
+        playlists: []
     })
     const [loading, setLoading] = useState(true)
 
@@ -54,11 +54,28 @@ export const LibraryProvider = ({ children }) => {
 }, [user])
 
     const addPlaylist = (playlist) => {
-    setLibrary(prev => ({
-        ...prev,
-        playlists: [playlist, ...prev.playlists]
-    }))
-}
+        setLibrary(prev => ({
+            ...prev,
+            playlists: [playlist, ...prev.playlists]
+        }))
+    }
+
+    const removePlaylist = (playlistId) => {
+        setLibrary(prev => ({
+            ...prev,
+            playlists: prev.playlists.filter(p => p._id !== playlistId),
+            followedPlaylists: prev.followedPlaylists.filter(p => (p._id || p) !== playlistId)
+        }))
+    }
+
+    const refreshPlaylists = async () => {
+        try {
+            const playlistsData = await fetchMyPlaylists()
+            setLibrary(prev => ({ ...prev, playlists: playlistsData || [] }))
+        } catch (error) {
+            console.error('Failed to refresh playlists:', error)
+        }
+    }
 
     // Helper function to check if a song is liked
     const isSongLiked = (songId) => {
@@ -174,7 +191,9 @@ export const LibraryProvider = ({ children }) => {
         isPlaylistFollowed,
         addFollowedPlaylist,
         removeFollowedPlaylist,
-        addPlaylist
+        addPlaylist,
+        removePlaylist,
+        refreshPlaylists
     }
 
     return (
@@ -184,6 +203,7 @@ export const LibraryProvider = ({ children }) => {
     )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useLibrary = () => {
     const context = useContext(LibraryContext)
     if (!context) {

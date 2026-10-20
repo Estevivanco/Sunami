@@ -9,7 +9,7 @@ import { useAuth } from '../hooks/useAuth'
  */
 function Navbar() {
   const navigate = useNavigate()
-  const { isLoggedIn, user, logout } = useAuth()
+  const { user, logout } = useAuth()
 
   const handleLogoutClick = async () => {
     try {

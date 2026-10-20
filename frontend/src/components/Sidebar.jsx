@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { ROUTES } from '../constants/routes'
 import { useAuth } from '../hooks/useAuth'
 import { useLibrary } from '../hooks/useLibrary'  // ✅ added
-import { createPlaylist } from '../services/playlistService'  // ✅ removed fetchMyPlaylists
+import { createPlaylist } from '../services/playlistService'
+import { getPlaylistGradient } from '../utils/playlistColor'
 import CreatePlaylistModal from './CreatePlaylistModal'
 import styles from './Sidebar.module.css'
 
@@ -48,20 +49,20 @@ function Sidebar() {
             {isLoggedIn && (  // ✅ boolean, no function call
                 <div className={styles.sidebarPlaylists}>
                     <div className={styles.playlistsHeader}>
-                        <h3>Spellistor</h3>
+                        <h3>Playlists</h3>
                         <button
                             className={styles.createPlaylistBtn}
                             onClick={() => setIsModalOpen(true)}
-                            title="Skapa spellista"
+                            title="Create playlist"
                         >
                             +
                         </button>
                     </div>
                     <div className={styles.playlistsList}>
                         {loading ? (
-                            <p className={styles.loadingText}>Laddar...</p>
-                        ) : library.playlists?.length === 0 ? (  // ✅ library.playlists
-                            <p className={styles.emptyText}>Inga spellistor än</p>
+                            <p className={styles.loadingText}>Loading...</p>
+                        ) : library.playlists?.length === 0 ? (
+                            <p className={styles.emptyText}>No playlists yet</p>
                         ) : (
                             library.playlists?.map((playlist) => (  // ✅ library.playlists
                                 <Link
@@ -69,8 +70,11 @@ function Sidebar() {
                                     to={`/playlist/${playlist._id}`}
                                     className={styles.playlistItem}
                                 >
-                                    <span className={styles.playlistIcon}>
-                                        {playlist.isPublic ? '🎵' : '🔒'}
+                                    <span
+                                        className={styles.playlistIcon}
+                                        style={{ background: getPlaylistGradient(playlist.name) }}
+                                    >
+                                        {!playlist.isPublic && '🔒'}
                                     </span>
                                     <span className={styles.playlistName}>{playlist.name}</span>
                                     <span className={styles.playlistCount}>

@@ -1,20 +1,24 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { fetchPlaylistById, deletePlaylist, followPlaylist, unfollowPlaylist, addCollaborator, removeCollaborator } from '../services/playlistService'
+import { fetchPlaylistById, deletePlaylist, followPlaylist, unfollowPlaylist, addCollaborator, removeCollaborator, removeSongFromPlaylist } from '../services/playlistService'
 import { searchUsers } from '../services/userService'
 import { formatDuration } from '../utils/formatDuration'
 import { formatDate } from '../utils/formatDate'
+import { getPlaylistGradient } from '../utils/playlistColor'
 import { usePlayer } from '../hooks/usePlayer'
 import { useAuth } from '../hooks/useAuth'
 import { useLibrary } from '../hooks/useLibrary'
+import { useToast } from '../hooks/useToast'
+import Toast from '../components/Toast'
+import Skeleton from '../components/Skeleton'
 import styles from './PlaylistPage.module.css'
 
 const PlaylistPage = () => {
     const { id } = useParams()
     const navigate = useNavigate()
-    const { play } = usePlayer()
+    const { play, currentSong } = usePlayer()
     const { user } = useAuth()
-    const { isPlaylistFollowed, addFollowedPlaylist, removeFollowedPlaylist } = useLibrary()
+    const { isPlaylistFollowed, addFollowedPlaylist, removeFollowedPlaylist, removePlaylist, refreshPlaylists } = useLibrary()
 
     const [playlist, setPlaylist] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -22,6 +26,8 @@ const PlaylistPage = () => {
     const [collaboratorSearch, setCollaboratorSearch] = useState('')
     const [searchResults, setSearchResults] = useState([])
     const [searchLoading, setSearchLoading] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const { toast, showToast, clearToast } = useToast()
 
     // Move loadPlaylistData outside useEffect for reuse
     const loadPlaylistData = async (signal) => {
@@ -42,6 +48,7 @@ const PlaylistPage = () => {
         const controller = new AbortController()
         loadPlaylistData(controller.signal)
         return () => controller.abort()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
 
     // Defensive: handle owner as object or string or null
@@ -64,21 +71,22 @@ const PlaylistPage = () => {
     }
 
     const handleDelete = async () => {
-        if (!window.confirm('Are you sure you want to delete this playlist?')) return
         try {
             await deletePlaylist(id)
+            removePlaylist(id)
             navigate('/library')
         } catch (err) {
-            alert('Failed to delete playlist: ' + err.message)
+            setShowDeleteConfirm(false)
+            showToast('Failed to delete playlist: ' + err.message)
         }
     }
 
     const handleFollow = async () => {
         try {
             await followPlaylist(id)
-            addFollowedPlaylist(id)
+            addFollowedPlaylist(playlist)
         } catch (err) {
-            alert('Failed to follow playlist: ' + err.message)
+            showToast('Failed to follow playlist: ' + err.message)
         }
     }
 
@@ -87,7 +95,7 @@ const PlaylistPage = () => {
             await unfollowPlaylist(id)
             removeFollowedPlaylist(id)
         } catch (err) {
-            alert('Failed to unfollow playlist: ' + err.message)
+            showToast('Failed to unfollow playlist: ' + err.message)
         }
     }
 
@@ -113,7 +121,7 @@ const PlaylistPage = () => {
             setSearchResults([])
             await loadPlaylistData()
         } catch (err) {
-            alert('Failed to add collaborator: ' + err.message)
+            showToast('Failed to add collaborator: ' + err.message)
         }
     }
 
@@ -122,11 +130,45 @@ const PlaylistPage = () => {
             await removeCollaborator(id, userId)
             await loadPlaylistData()
         } catch (err) {
-            alert('Failed to remove collaborator: ' + err.message)
+            showToast('Failed to remove collaborator: ' + err.message)
         }
     }
 
-    if (loading) return <div className={styles.playlistPage}>Loading playlist...</div>
+    const handleRemoveSong = async (songId) => {
+        try {
+            await removeSongFromPlaylist(id, songId)
+            setPlaylist(prev => ({
+                ...prev,
+                songs: prev.songs.filter(s => s._id !== songId)
+            }))
+            refreshPlaylists()
+        } catch (err) {
+            showToast('Failed to remove song: ' + err.message)
+        }
+    }
+
+    if (loading) return (
+        <div className={styles.playlistPage}>
+            <div className={styles.playlistHeader}>
+                <Skeleton width="232px" height="232px" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'flex-end' }}>
+                    <Skeleton width="70px"  height="12px" />
+                    <Skeleton width="260px" height="40px" />
+                    <Skeleton width="160px" height="16px" />
+                </div>
+            </div>
+            <div style={{ display: 'flex', gap: 12, margin: '24px 0' }}>
+                <Skeleton width="48px" height="48px" borderRadius="50%" />
+            </div>
+            {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'center', padding: '10px 0' }}>
+                    <Skeleton width="20px" height="16px" />
+                    <Skeleton width="55%"  height="16px" />
+                    <Skeleton width="15%"  height="16px" style={{ marginLeft: 'auto' }} />
+                </div>
+            ))}
+        </div>
+    )
     if (error) return (
         <div className={styles.playlistPage}>
             <p>Error: {error}</p>
@@ -150,11 +192,13 @@ const PlaylistPage = () => {
 
     return (
         <div className={styles.playlistPage}>
+            <Toast toast={toast} onDismiss={clearToast} />
             {/* Playlist Header */}
             <div className={styles.playlistHeader}>
-                <div className={styles.playlistCover}>
-                    <span className={styles.playlistIcon}>🎵</span>
-                </div>
+                <div
+                    className={styles.playlistCover}
+                    style={{ background: getPlaylistGradient(playlist.name) }}
+                />
                 <div className={styles.playlistInfo}>
                     <p className={styles.playlistType}>
                         {isSystemPlaylist ? 'Sunami Playlist' : 'Playlist'}
@@ -178,9 +222,17 @@ const PlaylistPage = () => {
                 {/* Delete — top-right of header, owner only */}
                 {isOwner && (
                     <div className={styles.playlistActions}>
-                        <button className={styles.deleteButton} onClick={handleDelete}>
-                            Delete Playlist
-                        </button>
+                        {showDeleteConfirm ? (
+                            <div className={styles.deleteConfirm}>
+                                <span className={styles.deleteConfirmText}>Delete this playlist?</span>
+                                <button className={styles.deleteConfirmBtn} onClick={handleDelete}>Delete</button>
+                                <button className={styles.cancelBtn} onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+                            </div>
+                        ) : (
+                            <button className={styles.deleteButton} onClick={() => setShowDeleteConfirm(true)}>
+                                Delete Playlist
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
@@ -266,11 +318,20 @@ const PlaylistPage = () => {
                             <span className={styles.headerAlbum}>Album</span>
                             <span className={styles.headerDate}>Date Added</span>
                             <span className={styles.headerDuration}>Duration</span>
+                            {canManageSongs && <span className={styles.headerActions}></span>}
                         </div>
                         <div className={styles.songsList}>
                             {songs.map((song, index) => (
-                                <div key={song._id} className={styles.songItem}>
-                                    <span className={styles.songNumber}>{index + 1}</span>
+                                <div key={song._id} className={`${styles.songItem} ${currentSong?._id === song._id ? styles.isPlaying : ''}`}>
+                                    {currentSong?._id === song._id ? (
+                                        <div className="equalizerBars">
+                                            <span className="equalizerBar" />
+                                            <span className="equalizerBar" />
+                                            <span className="equalizerBar" />
+                                        </div>
+                                    ) : (
+                                        <span className={styles.songNumber}>{index + 1}</span>
+                                    )}
                                     <div className={styles.songInfo}>
                                         <div className={styles.songTitle} onClick={() => handleSongClick(song)}>
                                             {song.title}
@@ -286,6 +347,15 @@ const PlaylistPage = () => {
                                     <div className={styles.songDuration}>
                                         {formatDuration(song.duration)}
                                     </div>
+                                    {canManageSongs && (
+                                        <button
+                                            className={styles.removeSongBtn}
+                                            onClick={() => handleRemoveSong(song._id)}
+                                            title="Remove from playlist"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                         </div>

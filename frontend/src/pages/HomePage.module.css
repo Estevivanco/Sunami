@@ -102,6 +102,21 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
+.playlistCover {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: #282828;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.playlistEmoji {
+  font-size: 40px;
+}
+
 .albumInfo {
   display: flex;
   flex-direction: column;

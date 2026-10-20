@@ -186,6 +186,10 @@
   color: #1db954;
 }
 
+.isPlaying .songTitle {
+  color: #1ed760;
+}
+
 .songMeta {
   font-size: 14px;
   color: #b3b3b3;

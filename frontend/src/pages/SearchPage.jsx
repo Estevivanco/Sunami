@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { searchSongs } from '../services/songService'
+import { searchSongs, fetchSongs } from '../services/songService'
 import { fetchArtists } from '../services/artistService'
 import { fetchAlbums } from '../services/albumService'
 import { likeSong, unlikeSong } from '../services/userService'
 import { getArtistRoute, getAlbumRoute, getPlaylistRoute } from '../constants/routes'
+import { getPlaylistGradient } from '../utils/playlistColor'
 import { formatDuration } from '../utils/formatDuration'
 import { usePlayer } from '../hooks/usePlayer'
 import { useAuth } from '../hooks/useAuth'
 import { useLibrary } from '../hooks/useLibrary'
+import { useToast } from '../hooks/useToast'
 import AddToPlaylistModal from '../components/AddToPlaylistModal'
+import Toast from '../components/Toast'
 import styles from './SearchPage.module.css'
 
 const SearchPage = () => {
@@ -18,13 +21,15 @@ const SearchPage = () => {
     const [searchResults, setSearchResults] = useState([])
     const [allArtists, setAllArtists] = useState([])
     const [allAlbums, setAllAlbums] = useState([])
+    const [allSongs, setAllSongs] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false)
     const [selectedSong, setSelectedSong] = useState(null)
-    const { play } = usePlayer()
+    const { play, currentSong } = usePlayer()
     const { user } = useAuth()
     const { isSongLiked, addLikedSong, removeLikedSong, library } = useLibrary()
+    const { toast, showToast, clearToast } = useToast()
     const sunamiPlaylists = (library?.allPlaylists || []).filter(p => p.isSystemPlaylist)
     const publicUserPlaylists = (library?.allPlaylists || []).filter(
         p => !p.isSystemPlaylist && p.isPublic
@@ -40,12 +45,14 @@ const SearchPage = () => {
         const controller = new AbortController()
         const loadBrowseData = async () => {
             try {
-                const [artists, albums] = await Promise.all([
+                const [artists, albums, songs] = await Promise.all([
                     fetchArtists(controller.signal),
-                    fetchAlbums(controller.signal)
+                    fetchAlbums(controller.signal),
+                    fetchSongs()
                 ])
                 setAllArtists(artists)
                 setAllAlbums(albums)
+                setAllSongs([...songs].sort((a, b) => (b.playCount || 0) - (a.playCount || 0)))
             } catch (err) {
                 if(err.name === 'AbortError') return
                 console.error('Error loading browse data:', err)
@@ -67,6 +74,7 @@ const SearchPage = () => {
         }, 300)
 
         return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchQuery])
 
 
@@ -85,7 +93,7 @@ const SearchPage = () => {
         }
     }
 
-    const handleSongClick = (song, index) => {
+    const handleSongClick = (song) => {
         play(song, searchResults)
     }
 
@@ -97,20 +105,15 @@ const SearchPage = () => {
     const handleLikeSong = async (song) => {
         try {
             const isLiked = isSongLiked(song._id)
-            console.log('Toggling like for song:', song._id, 'Current state:', isLiked)
-            
             if (isLiked) {
-                const response = await unlikeSong(song._id)
-                console.log('Unlike response:', response)
+                await unlikeSong(song._id)
                 removeLikedSong(song._id)
             } else {
-                const response = await likeSong(song._id)
-                console.log('Like response:', response)
-                addLikedSong(song._id)
+                await likeSong(song._id)
+                addLikedSong(song)
             }
         } catch (err) {
-            console.error('Error toggling like:', err)
-            alert('Failed to like/unlike song: ' + err.message)
+            showToast('Failed to like/unlike song: ' + err.message)
         }
     }
 
@@ -134,6 +137,7 @@ const SearchPage = () => {
 
     return (
         <div className={`page ${styles.searchPage}`}>
+            <Toast toast={toast} onDismiss={clearToast} />
             {/* Search Input */}
             <div className={styles.searchBar}>
                 <input
@@ -141,7 +145,7 @@ const SearchPage = () => {
                     className={styles.searchInput}
                     placeholder="What do you want to listen to?"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => { setSearchQuery(e.target.value); if (e.target.value) setBrowseCategory(null) }}
                     autoFocus
                 />
                 {searchQuery && (
@@ -156,20 +160,16 @@ const SearchPage = () => {
                 <div className={styles.browseSection}>
                     <h2 className={styles.sectionTitle}>Browse All</h2>
                     <div className={styles.categoryGrid}>
-                        <div className={styles.categoryCard} style={{ backgroundColor: '#1db954' }}>
+                        <div className={`${styles.categoryCard} ${styles.categoryArtists}`} onClick={() => setBrowseCategory('artists')}>
                             <h3>Artists</h3>
                         </div>
-                        <div className={styles.categoryCard} style={{ backgroundColor: '#e13300' }}>
+                        <div className={`${styles.categoryCard} ${styles.categoryAlbums}`} onClick={() => setBrowseCategory('albums')}>
                             <h3>Albums</h3>
                         </div>
-                        <div className={styles.categoryCard} style={{ backgroundColor: '#8d67ab' }}>
+                        <div className={`${styles.categoryCard} ${styles.categorySongs}`} onClick={() => setBrowseCategory('songs')}>
                             <h3>Songs</h3>
                         </div>
-                        <div
-                            className={styles.categoryCard}
-                            style={{ backgroundColor: '#bc5900', cursor: 'pointer' }}
-                            onClick={() => setBrowseCategory('playlists')}
-                        >
+                        <div className={`${styles.categoryCard} ${styles.categoryPlaylists}`} onClick={() => setBrowseCategory('playlists')}>
                             <h3>Playlists</h3>
                         </div>
                     </div>
@@ -184,9 +184,10 @@ const SearchPage = () => {
                                         to={getPlaylistRoute(playlist._id)}
                                         className={styles.albumCard}
                                     >
-                                        <div className={styles.albumCover} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#282828' }}>
-                                            <span className={styles.playlistIcon} style={{ fontSize: 40 }}>🎵</span>
-                                        </div>
+                                        <div
+                                            className={styles.playlistCover}
+                                            style={{ background: getPlaylistGradient(playlist.name) }}
+                                        />
                                         <div className={styles.albumInfo}>
                                             <h3 className={styles.albumTitle}>{playlist.name}</h3>
                                             <p className={styles.albumArtist}>{playlist.songs?.length || 0} songs</p>
@@ -202,12 +203,9 @@ const SearchPage = () => {
             {/* Show all public playlists if Playlists category is selected */}
             {!searchQuery.trim() && browseCategory === 'playlists' && (
                 <div className={styles.browseSection}>
-                    <div style={{ marginBottom: 0 }}>
-                        <button className={styles.backButton} onClick={() => setBrowseCategory(null)}>
-                            <span style={{ fontSize: 20, lineHeight: 1 }}>←</span>
-                            Back
-                        </button>
-                    </div>
+                    <button className={styles.backButton} onClick={() => setBrowseCategory(null)}>
+                        ← Back
+                    </button>
                     <h2 className={styles.sectionTitle}>All Public Playlists</h2>
                     <div className={styles.albumsGrid}>
                         {publicUserPlaylists.length === 0 && <p>No public playlists found.</p>}
@@ -218,9 +216,10 @@ const SearchPage = () => {
                                 className={styles.albumCard}
                             >
                                 {/* Playlist cover image or fallback */}
-                                <div className={styles.albumCover} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#282828' }}>
-                                    <span className={styles.playlistIcon} style={{ fontSize: 40 }}>🎵</span>
-                                </div>
+                                <div
+                                    className={styles.playlistCover}
+                                    style={{ background: getPlaylistGradient(playlist.name) }}
+                                />
                                 <div className={styles.albumInfo}>
                                     <h3 className={styles.albumTitle}>{playlist.name}</h3>
                                     <p className={styles.albumArtist}>By {playlist.owner?.username || 'Unknown'}</p>
@@ -231,6 +230,105 @@ const SearchPage = () => {
                     </div>
                 </div>
             )}
+            {/* Browse Artists */}
+            {!searchQuery.trim() && browseCategory === 'artists' && (
+                <div className={styles.browseSection}>
+                    <button className={styles.backButton} onClick={() => setBrowseCategory(null)}>
+                        ← Back
+                    </button>
+                    <h2 className={styles.sectionTitle}>All Artists</h2>
+                    <div className={styles.artistsGrid}>
+                        {allArtists.map((artist) => (
+                            <Link key={artist._id} to={getArtistRoute(artist._id)} className={styles.artistCard}>
+                                {artist.image && (
+                                    <img src={artist.image} alt={artist.name} className={styles.artistImage} />
+                                )}
+                                <div className={styles.artistInfo}>
+                                    <h3 className={styles.artistName}>{artist.name}</h3>
+                                    <p className={styles.artistMeta}>Artist</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Browse Albums */}
+            {!searchQuery.trim() && browseCategory === 'albums' && (
+                <div className={styles.browseSection}>
+                    <button className={styles.backButton} onClick={() => setBrowseCategory(null)}>
+                        ← Back
+                    </button>
+                    <h2 className={styles.sectionTitle}>All Albums</h2>
+                    <div className={styles.albumsGrid}>
+                        {allAlbums.map((album) => (
+                            <Link key={album._id} to={getAlbumRoute(album._id)} className={styles.albumCard}>
+                                {album.coverImage && (
+                                    <img src={album.coverImage} alt={album.title} className={styles.albumCover} />
+                                )}
+                                <div className={styles.albumInfo}>
+                                    <h3 className={styles.albumTitle}>{album.title}</h3>
+                                    <p className={styles.albumArtist}>{album.artist?.name || 'Unknown Artist'}</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Browse Songs */}
+            {!searchQuery.trim() && browseCategory === 'songs' && (
+                <div className={styles.browseSection}>
+                    <button className={styles.backButton} onClick={() => setBrowseCategory(null)}>
+                        ← Back
+                    </button>
+                    <h2 className={styles.sectionTitle}>Popular Songs</h2>
+                    <div className={styles.songsList}>
+                        {allSongs.slice(0, 50).map((song) => (
+                            <div key={song._id} className={`${styles.songItem} ${currentSong?._id === song._id ? styles.isPlaying : ''}`}>
+                                {song.album?.coverImage && (
+                                    <div className={styles.songImageWrapper}>
+                                        <img src={song.album.coverImage} alt={song.title} className={styles.songImage} />
+                                        {currentSong?._id === song._id && (
+                                            <div className={`${styles.songImageOverlay} equalizerBars`}>
+                                                <span className="equalizerBar" />
+                                                <span className="equalizerBar" />
+                                                <span className="equalizerBar" />
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                <div className={styles.songInfo}>
+                                    <div className={styles.songTitle} onClick={() => play(song, allSongs)}>
+                                        {song.title}
+                                    </div>
+                                    <div className={styles.songMeta}>{song.artist?.name}</div>
+                                </div>
+                                <div className={styles.songDuration}>{formatDuration(song.duration)}</div>
+                                {user && (
+                                    <div className={styles.songActions}>
+                                        <button
+                                            className={`${styles.iconButton} ${isSongLiked(song._id) ? styles.liked : ''}`}
+                                            onClick={() => handleLikeSong(song)}
+                                            title={isSongLiked(song._id) ? 'Remove from liked songs' : 'Add to liked songs'}
+                                        >
+                                            ♥
+                                        </button>
+                                        <button
+                                            className={styles.addButton}
+                                            onClick={() => { setSelectedSong(song); setIsPlaylistModalOpen(true) }}
+                                            title="Add to playlist"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* User Public Playlists in search results */}
             {searchQuery.trim() && !loading && !error && filteredPlaylists.length > 0 && (
                 <section className={styles.resultCategory}>
@@ -242,9 +340,10 @@ const SearchPage = () => {
                                 to={getPlaylistRoute(playlist._id)}
                                 className={styles.albumCard}
                             >
-                                <div className={styles.albumCover} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#282828' }}>
-                                    <span className={styles.playlistIcon} style={{ fontSize: 40 }}>🎵</span>
-                                </div>
+                                <div
+                                    className={styles.playlistCover}
+                                    style={{ background: getPlaylistGradient(playlist.name) }}
+                                />
                                 <div className={styles.albumInfo}>
                                     <h3 className={styles.albumTitle}>{playlist.name}</h3>
                                     <p className={styles.albumArtist}>By {playlist.owner?.username || 'Unknown'}</p>
@@ -268,9 +367,10 @@ const SearchPage = () => {
                                     to={getPlaylistRoute(playlist._id)}
                                     className={styles.card}
                                 >
-                                    <div className={styles.playlistCover}>
-                                        <span className={styles.playlistIcon}>🎵</span>
-                                    </div>
+                                    <div
+                                        className={styles.playlistCover}
+                                        style={{ background: getPlaylistGradient(playlist.name) }}
+                                    />
                                     <div className={styles.cardInfo}>
                                         <h3 className={styles.cardTitle}>{playlist.name}</h3>
                                         <p className={styles.cardMeta}>{playlist.songs?.length || 0} songs</p>
@@ -298,14 +398,19 @@ const SearchPage = () => {
                                         {searchResults.slice(0, 10).map((song, index) => (
                                             <div
                                                 key={song._id}
-                                                className={styles.songItem}
+                                                className={`${styles.songItem} ${currentSong?._id === song._id ? styles.isPlaying : ''}`}
                                             >
                                                 {song.album?.coverImage && (
-                                                    <img
-                                                        src={song.album.coverImage}
-                                                        alt={song.title}
-                                                        className={styles.songImage}
-                                                    />
+                                                    <div className={styles.songImageWrapper}>
+                                                        <img src={song.album.coverImage} alt={song.title} className={styles.songImage} />
+                                                        {currentSong?._id === song._id && (
+                                                            <div className={`${styles.songImageOverlay} equalizerBars`}>
+                                                                <span className="equalizerBar" />
+                                                                <span className="equalizerBar" />
+                                                                <span className="equalizerBar" />
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 )}
                                                 <div className={styles.songInfo}>
                                                     <div
