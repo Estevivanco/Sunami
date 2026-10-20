@@ -381,3 +381,75 @@
   padding: 8px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+@media (max-width: 768px) {
+  .artistHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-height: auto;
+    padding: 24px 16px;
+  }
+
+  .artistInfo {
+    align-items: center;
+  }
+
+  .artistMeta {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .artistImage {
+    width: 160px;
+    height: 160px;
+  }
+
+  .artistName {
+    font-size: 40px;
+    line-height: 44px;
+  }
+
+  .songAlbum,
+  .songDate,
+  .songPlayCount,
+  .headerAlbum,
+  .headerDate,
+  .headerPlayCount,
+  .tableHeader {
+    display: none;
+  }
+
+  .songItem {
+    grid-template-columns: 28px minmax(0, 1fr) auto auto;
+    gap: 12px;
+    padding: 8px 4px;
+  }
+
+  .albumsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (hover: none) {
+  .songActions .addButton,
+  .songActions .iconButton {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .artistMeta .artistGenre::after {
+    content: none;
+  }
+
+  .artistGenre {
+    text-transform: capitalize;
+  }
+
+  .followButton {
+    align-self: center;
+    margin-top: 8px;
+  }
+}

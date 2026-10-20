@@ -163,8 +163,33 @@
   font-style: italic;
 }
 
+/* Mobile: the sidebar becomes a bottom tab bar */
 @media (max-width: 768px) {
   .sidebar {
+    flex-direction: row;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    gap: 0;
+    background: #000;
+    border-top: 1px solid var(--surface-2);
+  }
+
+  .logo,
+  .sidebarPlaylists {
     display: none;
+  }
+
+  .sidebarNav {
+    flex: 1;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 0;
+  }
+
+  .navLink {
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 4px;
+    font-size: 11px;
   }
 }

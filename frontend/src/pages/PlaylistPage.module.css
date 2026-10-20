@@ -578,3 +578,29 @@
     justify-content: center;
   }
 }
+
+@media (max-width: 768px) {
+  .playlistActions {
+    position: static;
+  }
+
+  .songsHeader {
+    display: none;
+  }
+
+  .songItem {
+    grid-template-columns: 28px minmax(0, 1fr) auto auto;
+    gap: 12px;
+    padding: 8px 4px;
+  }
+
+  .removeSongBtn {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
+  .removeSongBtn {
+    opacity: 1;
+  }
+}

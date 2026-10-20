@@ -63,7 +63,14 @@
   .app {
     grid-template-areas:
       "main"
-      "player";
+      "player"
+      "sidebar";
     grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    height: 100dvh;
+  }
+
+  .content {
+    padding: 0;
   }
 }

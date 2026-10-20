@@ -156,3 +156,39 @@
 .volumeBtn:hover {
   color: #fff;
 }
+
+/* Mobile: compact mini-player */
+@media (max-width: 768px) {
+  .musicPlayer {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 8px 12px;
+    min-height: 64px;
+  }
+
+  .playerLeft {
+    min-width: 0;
+    gap: 12px;
+  }
+
+  .albumArt {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+  }
+
+  .trackInfo {
+    min-width: 0;
+  }
+
+  .trackName,
+  .artistName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .progressBar,
+  .playerRight {
+    display: none;
+  }
+}

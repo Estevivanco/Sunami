@@ -355,3 +355,34 @@
     gap: 12px;
   }
 }
+
+@media (max-width: 768px) {
+  .trackDate,
+  .trackPlayCount {
+    display: none;
+  }
+
+  .trackItem {
+    grid-template-columns: 28px minmax(0, 1fr) auto auto;
+    gap: 12px;
+    padding: 8px 4px;
+  }
+
+  .albumTitle {
+    font-size: 36px;
+    line-height: 40px;
+  }
+
+  .albumCover {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+/* Touch devices have no hover: always show row actions */
+@media (hover: none) {
+  .trackActions .addButton,
+  .trackActions .iconButton {
+    opacity: 1;
+  }
+}

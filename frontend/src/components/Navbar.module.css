@@ -66,3 +66,18 @@
 .btnLogout:hover {
   transform: scale(1.05);
 }
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 16px;
+  }
+
+  .navButtons {
+    display: none;
+  }
+
+  .userMenu {
+    margin-left: auto;
+    gap: 12px;
+  }
+}

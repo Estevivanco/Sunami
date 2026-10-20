@@ -36,6 +36,12 @@ const SearchPage = () => {
         p => !p.isSystemPlaylist && p.isPublic
     )
 
+    const filteredSunamiPlaylists = searchQuery.trim()
+        ? sunamiPlaylists.filter(p =>
+            p.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        : []
+
     const filteredPlaylists = searchQuery.trim()
         ? publicUserPlaylists.filter(p =>
             p.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -356,12 +362,11 @@ const SearchPage = () => {
                 </section>
             )}
             {/* Sunami Playlists in search results */}
-            {searchQuery.trim() && !loading && !error && sunamiPlaylists.length > 0 && (
+            {searchQuery.trim() && !loading && !error && filteredSunamiPlaylists.length > 0 && (
                 <section className={styles.resultCategory}>
                     <h2 className={styles.categoryTitle}>Sunami Playlists</h2>
                     <div className={styles.grid}>
-                        {sunamiPlaylists
-                            .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                        {filteredSunamiPlaylists
                             .map((playlist) => (
                                 <Link
                                     key={playlist._id}

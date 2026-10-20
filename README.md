@@ -15,6 +15,14 @@ A full-stack music app inspired by Spotify. Browse artists and albums, like song
 | ![Home](docs/screenshots/home.png) | ![Album](docs/screenshots/album.png) |
 | ![Playlist](docs/screenshots/playlist.png) | ![Library](docs/screenshots/library.png) |
 
+**Mobile-friendly:** the layout adapts to phones with a bottom tab bar, a compact mini-player and slimmed-down track lists.
+
+<p>
+  <img src="docs/screenshots/mobile-home.png" width="220" alt="Home on mobile" />
+  <img src="docs/screenshots/mobile-album.png" width="220" alt="Album on mobile" />
+  <img src="docs/screenshots/mobile-library.png" width="220" alt="Library on mobile" />
+</p>
+
 ### About playback
 
 Sunami doesn't host any audio. Every song stores its Spotify link, so **pressing play opens the track on Spotify**. The bottom player tracks what you selected and lets you step through the queue.
@@ -39,6 +47,7 @@ Sunami doesn't host any audio. Every song stores its Spotify link, so **pressing
 - **Library** — Like songs, save albums, follow artists and playlists. Optimistic UI updates.
 - **Playlists** — Create, edit, delete playlists. Invite collaborators by username. Follow public playlists from other users.
 - **Player** — Persistent bottom player with prev/next queue navigation. Currently-playing indicator on song rows.
+- **Responsive** — Works on desktop, tablet and phone.
 - **Admin** — Role-based access control. Admins can create curated "Sunami Playlists" and manage all content.
 
 ---
